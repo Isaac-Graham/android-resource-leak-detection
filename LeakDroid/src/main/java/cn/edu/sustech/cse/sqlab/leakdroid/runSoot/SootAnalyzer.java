@@ -1,28 +1,16 @@
 package cn.edu.sustech.cse.sqlab.leakdroid.runSoot;
 
-import cn.edu.sustech.cse.sqlab.leakdroid.Main;
 import cn.edu.sustech.cse.sqlab.leakdroid.test.Test;
 import cn.edu.sustech.cse.sqlab.leakdroid.tranformers.UnloadableBodiesEliminator;
 import cn.edu.sustech.cse.sqlab.leakdroid.util.PackManagerUtil;
 import org.apache.log4j.Logger;
 import soot.G;
 import soot.options.Options;
-import cn.edu.sustech.cse.sqlab.leakdroid.CommandOptions;
+import cn.edu.sustech.cse.sqlab.leakdroid.cmdparser.CommandOptions;
 import soot.PackManager;
-import soot.jimple.infoflow.android.axml.AXmlAttribute;
-import soot.jimple.infoflow.android.axml.AXmlNode;
-import soot.jimple.infoflow.android.axml.ApkHandler;
-import soot.jimple.infoflow.android.manifest.ProcessManifest;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Arrays;
-import java.util.List;
-
-import static java.util.Collections.emptyList;
 
 public class SootAnalyzer {
     private static Logger logger = Logger.getLogger(SootAnalyzer.class);
@@ -38,7 +26,7 @@ public class SootAnalyzer {
         Options sootOption = soot.options.Options.v();
         sootOption.set_allow_phantom_refs(true);
         sootOption.set_ignore_resolution_errors(true);
-        sootOption.set_output_dir(CommandOptions.outputDir.getAbsolutePath());
+        sootOption.set_output_dir(CommandOptions.getOutputDir().getAbsolutePath());
         sootOption.set_unfriendly_mode(true);
         sootOption.set_whole_program(true);
         sootOption.set_whole_shimple(true);

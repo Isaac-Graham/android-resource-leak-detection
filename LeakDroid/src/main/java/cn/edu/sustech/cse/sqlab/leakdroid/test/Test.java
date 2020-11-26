@@ -1,6 +1,6 @@
 package cn.edu.sustech.cse.sqlab.leakdroid.test;
 
-import cn.edu.sustech.cse.sqlab.leakdroid.CommandOptions;
+import cn.edu.sustech.cse.sqlab.leakdroid.cmdparser.CommandOptions;
 import cn.edu.sustech.cse.sqlab.leakdroid.annotation.PhaseName;
 import org.apache.log4j.Logger;
 import soot.Body;
@@ -37,7 +37,7 @@ public class Test extends BodyTransformer {
                 return;
             }
         }
-        String bodyFileName = String.format("./body/body%d.txt", count++);
+        String bodyFileName = String.format("./target/body/body%d.txt", count++);
         try (FileWriter fileWriter = new FileWriter(bodyFileName)) {
             fileWriter.write(body.toString());
         } catch (IOException e) {
