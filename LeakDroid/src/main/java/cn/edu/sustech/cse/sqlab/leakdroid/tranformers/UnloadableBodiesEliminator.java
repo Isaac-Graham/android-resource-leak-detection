@@ -1,5 +1,6 @@
 package cn.edu.sustech.cse.sqlab.leakdroid.tranformers;
 
+import cn.edu.sustech.cse.sqlab.leakdroid.annotation.PhaseName;
 import com.google.common.collect.Lists;
 import org.apache.log4j.Logger;
 import soot.*;
@@ -15,8 +16,9 @@ import java.util.Map;
  * @email ccccym666@gmail.com
  * @date 2020/11/22 22:59
  */
+@PhaseName(name = "wspp.load_bodies")
 public class UnloadableBodiesEliminator extends SceneTransformer {
-    private static Logger logger = Logger.getLogger(UnloadableBodiesEliminator.class);
+    private static final Logger logger = Logger.getLogger(UnloadableBodiesEliminator.class);
 
     @Override
     protected void internalTransform(String s, Map<String, String> map) {

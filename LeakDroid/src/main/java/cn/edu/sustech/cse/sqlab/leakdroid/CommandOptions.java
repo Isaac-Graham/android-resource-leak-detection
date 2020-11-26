@@ -7,7 +7,7 @@ import java.util.List;
 import net.dongliu.apk.parser.ApkFile;
 
 public class CommandOptions {
-    public static File outputDir = new File("./test_output_dir");
+    public static File outputDir = new File("./test_soot_output");
     public static boolean isVerboseMode = true;
     public static boolean generateSleepingApk = true;
 
