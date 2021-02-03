@@ -26,11 +26,11 @@
             <artifactId>log4j</artifactId>
             <version>1.2.17</version>
         </dependency>
-        <dependency>
-            <groupId>de.tud.sse</groupId>
-            <artifactId>soot-infoflow-android</artifactId>
-            <version>2.7.1</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>de.tud.sse</groupId>-->
+<!--            <artifactId>soot-infoflow-android</artifactId>-->
+<!--            <version>2.7.1</version>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>org.soot-oss</groupId>
             <artifactId>soot</artifactId>
@@ -58,8 +58,38 @@
             <version>4.12</version>
             <scope>test</scope>
         </dependency>
-
+        <dependency>
+            <groupId>com.googlecode.d2j</groupId>
+            <artifactId>dex-ir</artifactId>
+            <version>2.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.googlecode.d2j</groupId>
+            <artifactId>dex-reader</artifactId>
+            <version>2.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.googlecode.d2j</groupId>
+            <artifactId>dex-reader-api</artifactId>
+            <version>2.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.googlecode.d2j</groupId>
+            <artifactId>dex-tools</artifactId>
+            <version>2.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.googlecode.d2j</groupId>
+            <artifactId>dex-translator</artifactId>
+            <version>2.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.ow2.asm</groupId>
+            <artifactId>asm5</artifactId>
+            <version>5.0.3</version>
+        </dependency>
     </dependencies>
+
     <repositories>
         <repository>
             <id>local-deps</id>
@@ -69,6 +99,10 @@
         <repository>
             <id>jcenter</id>
             <url>https://jcenter.bintray.com/</url>
+        </repository>
+        <repository>
+            <id>Dex2jar Repo</id>
+            <url>http://repository-dex2jar.forge.cloudbees.com/release/</url>
         </repository>
     </repositories>
 
@@ -81,7 +115,7 @@
                 <artifactId>kotlin-maven-plugin</artifactId>
                 <version>${kotlin.version}</version>
                 <executions>
-                       <execution>
+                    <execution>
                         <id>compile</id>
                         <phase>compile</phase>
                         <goals>

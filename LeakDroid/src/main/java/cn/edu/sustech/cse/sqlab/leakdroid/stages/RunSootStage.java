@@ -1,19 +1,19 @@
-package cn.edu.sustech.cse.sqlab.leakdroid.runSoot;
+package cn.edu.sustech.cse.sqlab.leakdroid.stages;
 
 import cn.edu.sustech.cse.sqlab.leakdroid.test.Test;
+import cn.edu.sustech.cse.sqlab.leakdroid.tranformers.CFGDrawing;
 import cn.edu.sustech.cse.sqlab.leakdroid.tranformers.UnloadableBodiesEliminator;
 import cn.edu.sustech.cse.sqlab.leakdroid.util.PackManagerUtil;
 import org.apache.log4j.Logger;
 import soot.G;
-import soot.options.Options;
-import cn.edu.sustech.cse.sqlab.leakdroid.cmdparser.CommandOptions;
+import cn.edu.sustech.cse.sqlab.leakdroid.cmdparser.Options;
 import soot.PackManager;
 
 import java.io.File;
 import java.util.Arrays;
 
-public class SootAnalyzer {
-    private static Logger logger = Logger.getLogger(SootAnalyzer.class);
+public class RunSootStage extends BaseStage {
+    private final static Logger logger = Logger.getLogger(RunSootStage.class);
 
     public void run() {
         G.reset();
@@ -23,20 +23,20 @@ public class SootAnalyzer {
     }
 
     private void configureSoot() {
-        Options sootOption = soot.options.Options.v();
+        soot.options.Options sootOption = soot.options.Options.v();
         sootOption.set_allow_phantom_refs(true);
         sootOption.set_ignore_resolution_errors(true);
-        sootOption.set_output_dir(CommandOptions.getOutputDir().getAbsolutePath());
+        sootOption.set_output_dir(Options.getOutputDir().getAbsolutePath());
         sootOption.set_unfriendly_mode(true);
         sootOption.set_whole_program(true);
         sootOption.set_whole_shimple(true);
-        sootOption.set_verbose(CommandOptions.isVerboseMode);
+        sootOption.set_verbose(Options.isVerboseMode);
         sootOption.set_hierarchy_dirs(true);
         sootOption.set_via_shimple(true);
         sootOption.set_process_multiple_dex(true);
         sootOption.set_keep_line_number(true);
-        String apkFile = "C:\\Users\\Isc\\Desktop\\github-benchmark_d2j.jar";
-        sootOption.set_process_dir(Arrays.asList(apkFile.split(File.pathSeparator)));
+        String jarFile = "C:\\Users\\Isc\\Desktop\\tmp\\AnkiDroid-rev-3e9ddc7eca.apk_d2j.jar";
+        sootOption.set_process_dir(Arrays.asList(jarFile.split(File.pathSeparator)));
 //        if (CommandOptions.generateSleepingApk) {
 //            sootOption.set_exclude(emptyList());    // all class should be included to generate complete apk
 ////            sootOption.set_process_dir(sootOption.process_dir() + prepareSleeper());
@@ -53,8 +53,9 @@ public class SootAnalyzer {
     }
 
     private void addTransformers() {
-        PackManagerUtil.addTransformation(PackManager.v(), new UnloadableBodiesEliminator());
-        PackManagerUtil.addTransformation(PackManager.v(), new Test());
+        PackManagerUtil.addTransformation(PackManager.v(), new CFGDrawing());
+//        PackManagerUtil.addTransformation(PackManager.v(), new UnloadableBodiesEliminator());
+//        PackManagerUtil.addTransformation(PackManager.v(), new Test());
 //        PackManager.v().
     }
 

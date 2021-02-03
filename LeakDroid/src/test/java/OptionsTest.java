@@ -1,4 +1,4 @@
-import cn.edu.sustech.cse.sqlab.leakdroid.cmdparser.CommandOptions;
+import cn.edu.sustech.cse.sqlab.leakdroid.cmdparser.Options;
 import cn.edu.sustech.cse.sqlab.leakdroid.cmdparser.OptionsParser;
 import cn.edu.sustech.cse.sqlab.leakdroid.exceptions.ParseOptionsException;
 import org.junit.Test;
@@ -12,13 +12,13 @@ public class OptionsTest {
 
     private void run(String[] args) {
         OptionsParser.parse(args);
-        CommandOptions.initialOptions();
+        Options.initialOptions();
     }
 
     @Test
     public void test_success() {
         String[] args = {"-i",
-                "C:\\Users\\Isc\\Desktop\\github-benchmark.apk",
+                "C:\\Users\\Isc\\Desktop\\AnkiDroid-rev-3e9ddc7eca.apk",
                 "-a",
                 String.format("%s\\platforms", System.getenv("ANDROID_HOME"))};
         run(args);

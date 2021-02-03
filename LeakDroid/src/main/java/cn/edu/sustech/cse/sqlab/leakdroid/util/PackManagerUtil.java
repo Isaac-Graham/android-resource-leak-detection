@@ -1,7 +1,6 @@
 package cn.edu.sustech.cse.sqlab.leakdroid.util;
 
 import cn.edu.sustech.cse.sqlab.leakdroid.annotation.PhaseName;
-import cn.edu.sustech.cse.sqlab.leakdroid.runSoot.SootAnalyzer;
 import org.apache.log4j.Logger;
 import soot.PackManager;
 import soot.Transform;
@@ -22,7 +21,6 @@ public class PackManagerUtil {
         Annotation[] annotations = t.getClass().getAnnotations();
         String phaseName = null;
         for (int i = 0; i < annotations.length; i++) {
-            logger.info(annotations[i].annotationType());
             if (annotations[i].annotationType() == PhaseName.class) {
                 phaseName = ((PhaseName) annotations[i]).name();
                 break;

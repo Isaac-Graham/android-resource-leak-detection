@@ -1,16 +1,22 @@
 package cn.edu.sustech.cse.sqlab.leakdroid;
 
-import cn.edu.sustech.cse.sqlab.leakdroid.cmdparser.CommandOptions;
+import cn.edu.sustech.cse.sqlab.leakdroid.cmdparser.Options;
 import cn.edu.sustech.cse.sqlab.leakdroid.cmdparser.OptionsParser;
+import cn.edu.sustech.cse.sqlab.leakdroid.stages.RunSootStage;
 import org.apache.log4j.Logger;
+
+import java.io.IOException;
 
 
 public class Main {
     private static final Logger logger = Logger.getLogger(Main.class);
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         OptionsParser.parse(args);
-        CommandOptions.initialOptions();
+        Options.initialOptions();
+
+        RunSootStage analyzer = new RunSootStage();
+        analyzer.run();
     }
 }
 
