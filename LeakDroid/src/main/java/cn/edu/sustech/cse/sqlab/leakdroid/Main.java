@@ -1,8 +1,9 @@
 package cn.edu.sustech.cse.sqlab.leakdroid;
 
-import cn.edu.sustech.cse.sqlab.leakdroid.cmdparser.Options;
+import cn.edu.sustech.cse.sqlab.leakdroid.cmdparser.OptionsArgs;
 import cn.edu.sustech.cse.sqlab.leakdroid.cmdparser.OptionsParser;
-import cn.edu.sustech.cse.sqlab.leakdroid.stages.RunSootStage;
+import cn.edu.sustech.cse.sqlab.leakdroid.stages.BaseStage;
+import cn.edu.sustech.cse.sqlab.leakdroid.stages.MainStage;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
@@ -13,10 +14,12 @@ public class Main {
 
     public static void main(String[] args) throws IOException {
         OptionsParser.parse(args);
-        Options.initialOptions();
+        OptionsArgs.initialOptions();
 
-        RunSootStage analyzer = new RunSootStage();
-        analyzer.run();
+        BaseStage stagePipeLine = new MainStage();
+        stagePipeLine.run();
+//        RunSootStage analyzer = new RunSootStage();
+//        analyzer.run();
     }
 }
 

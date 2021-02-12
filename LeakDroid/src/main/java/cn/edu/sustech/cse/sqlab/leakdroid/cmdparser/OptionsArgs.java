@@ -11,8 +11,8 @@ import com.sun.istack.NotNull;
 import org.apache.commons.cli.CommandLine;
 import org.apache.log4j.Logger;
 
-public class Options {
-    private final static Logger logger = Logger.getLogger(Options.class);
+public class OptionsArgs {
+    private final static Logger logger = Logger.getLogger(OptionsArgs.class);
     private static File outputDir;
     private static File inputApkFile;
     private static File androidSdkFolder;
@@ -50,6 +50,9 @@ public class Options {
         String outputDirPath = cmdLine.hasOption(OptName.shortOutputDir) ?
                 cmdLine.getOptionValue(OptName.shortOutputDir) : "./output/ssaOutput";
         outputDir = new File(outputDirPath);
+        if (!outputDir.exists()) {
+            outputDir.mkdirs();
+        }
     }
 
     private static void initialInputFile() {
@@ -95,7 +98,7 @@ public class Options {
     }
 
     public static void setConvertedJarFile(@NotNull File convertedJarFile) {
-        Options.convertedJarFile = convertedJarFile;
+        OptionsArgs.convertedJarFile = convertedJarFile;
     }
 
     public static File getTemporaryWorkingDirectory() {

@@ -1,4 +1,4 @@
-import cn.edu.sustech.cse.sqlab.leakdroid.cmdparser.Options;
+import cn.edu.sustech.cse.sqlab.leakdroid.cmdparser.OptionsArgs;
 import cn.edu.sustech.cse.sqlab.leakdroid.cmdparser.OptionsParser;
 import cn.edu.sustech.cse.sqlab.leakdroid.exceptions.ParseOptionsException;
 import org.junit.Test;
@@ -12,7 +12,7 @@ public class OptionsTest {
 
     private void run(String[] args) {
         OptionsParser.parse(args);
-        Options.initialOptions();
+        OptionsArgs.initialOptions();
     }
 
     @Test

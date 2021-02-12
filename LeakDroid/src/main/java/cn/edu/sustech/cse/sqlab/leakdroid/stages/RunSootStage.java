@@ -1,12 +1,10 @@
 package cn.edu.sustech.cse.sqlab.leakdroid.stages;
 
-import cn.edu.sustech.cse.sqlab.leakdroid.test.Test;
 import cn.edu.sustech.cse.sqlab.leakdroid.tranformers.CFGDrawing;
-import cn.edu.sustech.cse.sqlab.leakdroid.tranformers.UnloadableBodiesEliminator;
 import cn.edu.sustech.cse.sqlab.leakdroid.util.PackManagerUtil;
 import org.apache.log4j.Logger;
 import soot.G;
-import cn.edu.sustech.cse.sqlab.leakdroid.cmdparser.Options;
+import cn.edu.sustech.cse.sqlab.leakdroid.cmdparser.OptionsArgs;
 import soot.PackManager;
 
 import java.io.File;
@@ -26,17 +24,20 @@ public class RunSootStage extends BaseStage {
         soot.options.Options sootOption = soot.options.Options.v();
         sootOption.set_allow_phantom_refs(true);
         sootOption.set_ignore_resolution_errors(true);
-        sootOption.set_output_dir(Options.getOutputDir().getAbsolutePath());
+        sootOption.set_output_dir(OptionsArgs.getOutputDir().getAbsolutePath());
         sootOption.set_unfriendly_mode(true);
         sootOption.set_whole_program(true);
         sootOption.set_whole_shimple(true);
-        sootOption.set_verbose(Options.isVerboseMode);
+        sootOption.set_verbose(OptionsArgs.isVerboseMode);
         sootOption.set_hierarchy_dirs(true);
         sootOption.set_via_shimple(true);
         sootOption.set_process_multiple_dex(true);
         sootOption.set_keep_line_number(true);
-        String jarFile = "C:\\Users\\Isc\\Desktop\\tmp\\AnkiDroid-rev-3e9ddc7eca.apk_d2j.jar";
-        sootOption.set_process_dir(Arrays.asList(jarFile.split(File.pathSeparator)));
+
+
+        sootOption.set_exclude(OptionsArgs.excludedPackageNames);
+
+        sootOption.set_process_dir(Arrays.asList(OptionsArgs.getConvertedJarFile().getAbsolutePath().split(File.pathSeparator)));
 //        if (CommandOptions.generateSleepingApk) {
 //            sootOption.set_exclude(emptyList());    // all class should be included to generate complete apk
 ////            sootOption.set_process_dir(sootOption.process_dir() + prepareSleeper());

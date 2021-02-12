@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 
+import cn.edu.sustech.cse.sqlab.leakdroid.cmdparser.OptionsArgs;
 import com.googlecode.d2j.dex.Dex2jar;
 import com.googlecode.d2j.reader.DexFileReader;
 import com.googlecode.d2j.reader.zip.ZipUtil;
@@ -30,7 +31,9 @@ public class Dex2Jar2_0 extends Dex2Jar {
                 .skipDebug(true)
                 .optimizeSynchronized(false)
                 .to(outputJarFile.toPath());
-        logger.info(outputJarFile);
+
+        OptionsArgs.setConvertedJarFile(outputJarFile);
+        logger.info(String.format("Apk file is converted to %s", outputJarFile));
         return outputJarFile;
     }
 }

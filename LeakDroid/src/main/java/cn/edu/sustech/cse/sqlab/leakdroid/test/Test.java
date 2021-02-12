@@ -1,6 +1,6 @@
 package cn.edu.sustech.cse.sqlab.leakdroid.test;
 
-import cn.edu.sustech.cse.sqlab.leakdroid.cmdparser.Options;
+import cn.edu.sustech.cse.sqlab.leakdroid.cmdparser.OptionsArgs;
 import cn.edu.sustech.cse.sqlab.leakdroid.annotation.PhaseName;
 import org.apache.log4j.Logger;
 import soot.Body;
@@ -27,7 +27,7 @@ public class Test extends BodyTransformer {
     @Override
     protected void internalTransform(Body body, String phaseName, Map<String, String> map) {
         List<Pattern> patterns = new LinkedList<>();
-        Options.excludedPackageNames.forEach(packageName -> {
+        OptionsArgs.excludedPackageNames.forEach(packageName -> {
             patterns.add(Pattern.compile(packageName));
         });
         for (int i = 0; i < patterns.size(); i++) {

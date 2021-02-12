@@ -64,7 +64,7 @@ public class OptionsParser {
         helpFormatter.printHelp(printWriter, HelpFormatter.DEFAULT_WIDTH, "scp -help", null,
                 options, HelpFormatter.DEFAULT_LEFT_PAD, HelpFormatter.DEFAULT_DESC_PAD, null);
         printWriter.flush();
-        String help = new String(byteArrayOutputStream.toByteArray());
+        String help = byteArrayOutputStream.toString();
         printWriter.close();
         return help;
     }
