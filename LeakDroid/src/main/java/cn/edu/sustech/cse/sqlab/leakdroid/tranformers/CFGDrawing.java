@@ -42,7 +42,7 @@ public class CFGDrawing extends BodyTransformer {
 
         logger.info(String.format("%s.dot", body.getMethod().getName()));
         dotGraph.plot(Paths.get(OptionsArgs.getOutputDir().getAbsolutePath(),
-                String.format("%s.dot", body.getMethod().getName())).toString());
+                String.format("%s.dot", body.getMethod().getName().replace('<', 'l').replace('>', 'r'))).toString());
 
         logger.info(String.format("CFG of %s method drawn", body.getMethod().toString()));
     }
@@ -52,10 +52,5 @@ public class CFGDrawing extends BodyTransformer {
                 sootMethod.getReturnType().toString(),
                 sootMethod.getName());
         return res;
-//
-//        String params = "";
-//        for (int i = 0; i < sootMethod.getParameterCount(); i++) {
-//
-//        }
     }
 }
