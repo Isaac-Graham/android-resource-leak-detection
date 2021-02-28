@@ -8,6 +8,9 @@ import soot.toolkits.graph.ExceptionalUnitGraph;
 import soot.util.dot.DotGraph;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
@@ -39,18 +42,21 @@ public class CFGDrawing extends BodyTransformer {
             });
         });
 
+        String packageName = body.getMethod().getDeclaringClass().getPackageName();
+        Path path = Paths.get(OptionsArgs.getOutputDir().getAbsolutePath(), packageName.replaceAll("\\.", "/"));
 
-        logger.info(String.format("%s.dot", body.getMethod().getName()));
-        dotGraph.plot(Paths.get(OptionsArgs.getOutputDir().getAbsolutePath(),
+        String predecessorPath = OptionsArgs.getOutputDir().getAbsolutePath();
+        try {
+            Path pathCreate = Files.createDirectories(path);
+            if (pathCreate.toFile().exists()) {
+                predecessorPath = pathCreate.toString();
+            }
+        } catch (IOException e) {
+            // ignore
+        }
+        dotGraph.plot(Paths.get(predecessorPath,
                 String.format("%s.dot", body.getMethod().getName().replace('<', 'l').replace('>', 'r'))).toString());
 
         logger.info(String.format("CFG of %s method drawn", body.getMethod().toString()));
-    }
-
-    private static String getFileName(SootMethod sootMethod) {
-        String res = String.format("%s_%s_%s", sootMethod.getDeclaringClass().toString(),
-                sootMethod.getReturnType().toString(),
-                sootMethod.getName());
-        return res;
     }
 }

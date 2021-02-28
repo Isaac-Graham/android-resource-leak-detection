@@ -3,6 +3,11 @@ import cn.edu.sustech.cse.sqlab.leakdroid.cmdparser.OptionsParser;
 import cn.edu.sustech.cse.sqlab.leakdroid.exceptions.ParseOptionsException;
 import org.junit.Test;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 /**
  * @author Isaac Chen
  * @email ccccym666@gmail.com
@@ -15,14 +20,6 @@ public class OptionsTest {
         OptionsArgs.initialOptions();
     }
 
-    @Test
-    public void test_success() {
-        String[] args = {"-i",
-                "C:\\Users\\Isc\\Desktop\\AnkiDroid-rev-3e9ddc7eca.apk",
-                "-a",
-                String.format("%s\\platforms", System.getenv("ANDROID_HOME"))};
-        run(args);
-    }
 
     @Test(expected = ParseOptionsException.class)
     public void test_invalid_android_path() {

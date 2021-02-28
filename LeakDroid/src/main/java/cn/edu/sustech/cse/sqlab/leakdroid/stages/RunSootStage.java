@@ -11,6 +11,8 @@ import cn.edu.sustech.cse.sqlab.leakdroid.cmdparser.OptionsArgs;
 import soot.PackManager;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Arrays;
 
 public class RunSootStage extends BaseStage {
@@ -37,8 +39,21 @@ public class RunSootStage extends BaseStage {
         sootOption.set_process_multiple_dex(true);
         sootOption.set_keep_line_number(true);
 
+        int apiLevel = 0;
+        try {
+            apiLevel = Integer.parseInt(OptionsArgs.getInputApkFileInfo().getApkMeta().getTargetSdkVersion());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
-        sootOption.set_exclude(OptionsArgs.excludedPackageNames);
+
+        sootOption.set_soot_classpath(String.join(File.pathSeparator, Arrays.asList(
+                OptionsArgs.getConvertedJarFile().getAbsolutePath(),
+                OptionsArgs.getAndroidLibMap().get(apiLevel)
+                ))
+        );
+        sootOption.set_output_format(soot.options.Options.output_format_none);
+//        sootOption.set_exclude(OptionsArgs.excludedPackageNames);
 
         sootOption.set_process_dir(Arrays.asList(OptionsArgs.getConvertedJarFile().getAbsolutePath().split(File.pathSeparator)));
 //        if (CommandOptions.generateSleepingApk) {

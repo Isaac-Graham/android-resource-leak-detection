@@ -45,6 +45,13 @@ public class OptionsParser {
                 .type(String.class)
                 .desc("Path to output folder")
                 .build());
+        options.addOption(Option.builder(OptName.shortOverrideOutputDir)
+                .longOpt(OptName.longOverrideOutputDir)
+                .argName("override the output directory")
+                .hasArg(false)
+                .type(boolean.class)
+                .desc("Whether override the output directory or not")
+                .build());
         try {
             commandLine = commandLineParser.parse(options, args);
         } catch (ParseException e) {
