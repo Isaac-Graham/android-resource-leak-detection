@@ -1,10 +1,9 @@
 package cn.edu.sustech.cse.sqlab.leakdroid.stages;
 
-import cn.edu.sustech.cse.sqlab.leakdroid.tranformers.CFGDrawing;
-import cn.edu.sustech.cse.sqlab.leakdroid.tranformers.ICFGDrawing;
-import cn.edu.sustech.cse.sqlab.leakdroid.tranformers.TestICFG;
+import cn.edu.sustech.cse.sqlab.leakdroid.tranformers.UnloadableBodiesEliminator;
+import cn.edu.sustech.cse.sqlab.leakdroid.tranformers.interprocedural.ICFGDrawer;
+import cn.edu.sustech.cse.sqlab.leakdroid.tranformers.interprocedural.TestICFG;
 import cn.edu.sustech.cse.sqlab.leakdroid.util.PackManagerUtil;
-import fj.P;
 import org.apache.log4j.Logger;
 import soot.G;
 import cn.edu.sustech.cse.sqlab.leakdroid.cmdparser.OptionsArgs;
@@ -12,7 +11,6 @@ import soot.PackManager;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.util.Arrays;
 
 public class RunSootStage extends BaseStage {
@@ -53,7 +51,8 @@ public class RunSootStage extends BaseStage {
                 ))
         );
         sootOption.set_output_format(soot.options.Options.output_format_none);
-//        sootOption.set_exclude(OptionsArgs.excludedPackageNames);
+        sootOption.set_exclude(OptionsArgs.excludedPackageNames);
+//        sootOption.set_include(OptionsArgs.includedPackageNames);
 
         sootOption.set_process_dir(Arrays.asList(OptionsArgs.getConvertedJarFile().getAbsolutePath().split(File.pathSeparator)));
 //        if (CommandOptions.generateSleepingApk) {
@@ -72,9 +71,11 @@ public class RunSootStage extends BaseStage {
     }
 
     private void addTransformers() {
-        PackManagerUtil.addTransformation(PackManager.v(), new CFGDrawing());
-//        PackManagerUtil.addTransformation(PackManager.v() , new ICFGDrawing());
+        PackManagerUtil.addTransformation(PackManager.v(), new UnloadableBodiesEliminator());
+        PackManagerUtil.addTransformation(PackManager.v(), new ICFGDrawer());
+//        PackManagerUtil.addTransformation(PackManager.v(), new ICFGGenerator());
 //        PackManagerUtil.addTransformation(PackManager.v(), new TestICFG());
+//        PackManagerUtil.addTransformation(PackManager.v(), new CFGDrawing());
 //        PackManagerUtil.addTransformation(PackManager.v(), new UnloadableBodiesEliminator());
 //        PackManagerUtil.addTransformation(PackManager.v(), new Test());
 //        PackManager.v().

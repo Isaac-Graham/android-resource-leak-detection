@@ -35,7 +35,6 @@ public class CFGDrawing extends BodyTransformer {
         DotGraph dotGraph = new DotGraph(String.format("CFG of %s", body.getMethod()));
         body.getUnits().forEach(unit -> {
             dotGraph.drawNode(unit.toString()).setAttribute("color", "black");
-
             List<Unit> successors = cfg.getSuccsOf(unit);
             successors.forEach(successor -> {
                 dotGraph.drawEdge(unit.toString(), successor.toString()).setAttribute("color", "black");
@@ -54,9 +53,19 @@ public class CFGDrawing extends BodyTransformer {
         } catch (IOException e) {
             // ignore
         }
-        dotGraph.plot(Paths.get(predecessorPath,
-                String.format("%s.dot", body.getMethod().getName().replace('<', 'l').replace('>', 'r'))).toString());
+        dotGraph.plot(
+                Paths.get(predecessorPath,
+                        getFileName(body.getMethod())
+                ).toString());
 
         logger.info(String.format("CFG of %s method drawn", body.getMethod().toString()));
+    }
+
+    private static String getFileName(SootMethod sootMethod) {
+        return String.format("%s_%s.dot",
+                sootMethod.getDeclaringClass().toString(),
+                sootMethod.getName())
+                .replace('<', 'l')
+                .replace('>', 'r');
     }
 }

@@ -34,8 +34,6 @@ public class OptionsArgs {
             "androidx.*",
             "com.android.*",
             "com.google.android.*",
-//            "java.*",
-//            "javax.*",
             "kotlin.*",
             "kotlinx.*",
             "io.reactivex.*",
@@ -46,6 +44,11 @@ public class OptionsArgs {
             "com.alibaba.fastjson.*",
             "com.google.protobuf.*",
             "com.bumptech.glide.*"
+    );
+
+    public static List<String> includedPackageNames = Arrays.asList(
+            "java.*",
+            "javax.*"
     );
 
     public static void initialOptions() {
@@ -124,7 +127,6 @@ public class OptionsArgs {
                     return;
                 }
                 try (ApkFile apkFile = new ApkFile(file)) {
-                    logger.debug(file);
                     Integer targetSdkVersion = Integer.parseInt(apkFile.getApkMeta().getTargetSdkVersion());
                     androidLibMap.put(targetSdkVersion, file);
                 } catch (ParserException pe) {
@@ -136,10 +138,6 @@ public class OptionsArgs {
         } catch (IOException e) {
             logger.error(String.format("Error occurs: %s", e.toString()));
         }
-
-        androidLibMap.forEach((k, v) -> {
-            logger.info(String.format("k: %s, v: %s", k, v));
-        });
     }
 
     public static void initialInputApkFileInfo() {

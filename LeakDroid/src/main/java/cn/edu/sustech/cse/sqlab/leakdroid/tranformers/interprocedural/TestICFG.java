@@ -1,14 +1,13 @@
-package cn.edu.sustech.cse.sqlab.leakdroid.tranformers;
+package cn.edu.sustech.cse.sqlab.leakdroid.tranformers.interprocedural;
 
 import cn.edu.sustech.cse.sqlab.leakdroid.annotation.PhaseName;
+import cn.edu.sustech.cse.sqlab.leakdroid.tranformers.ICFGContext;
 import org.apache.log4j.Logger;
 import soot.Body;
 import soot.BodyTransformer;
-import soot.SootMethod;
 import soot.jimple.InvokeStmt;
 import soot.toolkits.graph.ExceptionalUnitGraph;
 
-import java.util.Collection;
 import java.util.Map;
 
 /**
@@ -22,12 +21,21 @@ public class TestICFG extends BodyTransformer {
 
     @Override
     protected void internalTransform(Body body, String s, Map<String, String> map) {
+        logger.info(body.getMethod());
         ExceptionalUnitGraph cfg = new ExceptionalUnitGraph(body);
         body.getUnits().forEach(unit -> {
-            if (unit instanceof InvokeStmt) {
-                logger.info(((InvokeStmt) unit).getInvokeExpr().getMethodRef());
-                logger.info(((InvokeStmt) unit).getInvokeExpr().getMethod());
-            }
+//            if (ICFGContext.icfg.isCallStmt(unit)) {
+//                logger.info(unit);
+//            }
+//            if (unit instanceof InvokeStmt) {
+//                Body anotherBody = ICFGContext.icfg.getBodyOf(unit);
+////                Body anotherBody = ICFGContext.methodBodyMap.get(((InvokeStmt) unit).getInvokeExpr().getMethod());
+//                if (anotherBody == null) {
+//                    logger.info(String.format("Body of %s not found", ((InvokeStmt) unit).getInvokeExpr().getMethod()));
+//                } else {
+//                    logger.debug(anotherBody);
+//                }
+//            }
         });
 //        try {
 //            logger.info(String.format("Callee: %s, Caller: %s", ICFGDrawing.icfg., body.getMethod()));
