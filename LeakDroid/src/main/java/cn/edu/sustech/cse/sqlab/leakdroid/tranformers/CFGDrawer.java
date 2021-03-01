@@ -2,12 +2,12 @@ package cn.edu.sustech.cse.sqlab.leakdroid.tranformers;
 
 import cn.edu.sustech.cse.sqlab.leakdroid.annotation.PhaseName;
 import cn.edu.sustech.cse.sqlab.leakdroid.cmdparser.OptionsArgs;
+import cn.edu.sustech.cse.sqlab.leakdroid.tags.ResourceLeakTag;
 import org.apache.log4j.Logger;
 import soot.*;
 import soot.toolkits.graph.ExceptionalUnitGraph;
 import soot.util.dot.DotGraph;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -22,8 +22,8 @@ import java.util.Map;
  */
 
 @PhaseName(name = "stp.drawcfg")
-public class CFGDrawing extends BodyTransformer {
-    private final static Logger logger = Logger.getLogger(CFGDrawing.class);
+public class CFGDrawer extends BodyTransformer {
+    private final static Logger logger = Logger.getLogger(CFGDrawer.class);
 
 
     @Override
@@ -34,10 +34,18 @@ public class CFGDrawing extends BodyTransformer {
 
         DotGraph dotGraph = new DotGraph(String.format("CFG of %s", body.getMethod()));
         body.getUnits().forEach(unit -> {
-            dotGraph.drawNode(unit.toString()).setAttribute("color", "black");
+            if (unit.hasTag(ResourceLeakTag.name)) {
+                dotGraph.drawNode(unit.toString()).setAttribute("color", "red");
+            } else {
+                dotGraph.drawNode(unit.toString()).setAttribute("color", "black");
+            }
             List<Unit> successors = cfg.getSuccsOf(unit);
             successors.forEach(successor -> {
-                dotGraph.drawEdge(unit.toString(), successor.toString()).setAttribute("color", "black");
+                if (unit.hasTag(ResourceLeakTag.name) && successor.hasTag(ResourceLeakTag.name)) {
+                    dotGraph.drawEdge(unit.toString(), successor.toString()).setAttribute("color", "red");
+                } else {
+                    dotGraph.drawEdge(unit.toString(), successor.toString()).setAttribute("color", "black");
+                }
             });
         });
 
