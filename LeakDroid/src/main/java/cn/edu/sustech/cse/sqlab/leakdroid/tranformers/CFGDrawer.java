@@ -14,6 +14,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author Isaac Chen
@@ -33,6 +34,7 @@ public class CFGDrawer extends BodyTransformer {
         ExceptionalUnitGraph cfg = new ExceptionalUnitGraph(body);
 
         DotGraph dotGraph = new DotGraph(String.format("CFG of %s", body.getMethod()));
+
         body.getUnits().forEach(unit -> {
             if (unit.hasTag(ResourceLeakTag.name)) {
                 dotGraph.drawNode(unit.toString()).setAttribute("color", "red");
@@ -49,8 +51,10 @@ public class CFGDrawer extends BodyTransformer {
             });
         });
 
+        boolean leak = body.getUnits().stream().anyMatch(unit -> unit.hasTag(ResourceLeakTag.name));
+        String baseFolder = leak ? "leak" : "not_leak";
         String packageName = body.getMethod().getDeclaringClass().getPackageName();
-        Path path = Paths.get(OptionsArgs.getOutputDir().getAbsolutePath(), packageName.replaceAll("\\.", "/"));
+        Path path = Paths.get(OptionsArgs.getOutputDir().getAbsolutePath(), baseFolder, packageName.replaceAll("\\.", "/"));
 
         String predecessorPath = OptionsArgs.getOutputDir().getAbsolutePath();
         try {
