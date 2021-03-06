@@ -45,60 +45,59 @@ public class ICFGDetector extends BodyTransformer {
 
     @Override
     protected void internalTransform(Body body, String s, Map<String, String> map) {
+        if (!body.getMethod().getName().contains("foo")) return;
+        if (body.getMethod().toString().contains(SootMethod.staticInitializerName)) return;
         SootMethodUtil.ensureSSA(body.getMethod());
         SootMethodUtil.updateLocalName(body.getMethod());
         ExceptionalUnitGraph cfg = new ExceptionalUnitGraph(body);
 
-//        if (body.getMethod().toString().contains(SootMethod.staticInitializerName)) return;
-//        ExceptionalUnitGraph cfg = new ExceptionalUnitGraph(body);
-//        body.getUnits().stream().filter(Analyzer::isRequest).forEach(unit -> {
-//            if (Analyzer.isLeakage(unit, cfg)) {
-//                logger.info(body.getMethod());
-//            }
-//        });
-        if (!body.getMethod().getName().contains("foo")) return;
+        body.getUnits().stream().filter(Analyzer::isRequest).forEach(unit -> {
+            logger.info(body.getMethod());
+            if (new Analyzer(cfg).isLeakage((InvokeStmt) unit)) {
+            }
+        });
 
-//        SimpleLocalDefs slf = new SimpleLocalDefs(cfg);
-//        body.getLocals().forEach(local-> {
-//            logger.info(slf.getDefsOf(local));
-//        });
+        SimpleLocalDefs slf = new SimpleLocalDefs(cfg);
+        body.getLocals().forEach(local -> {
+            logger.info(slf.getDefsOf(local));
+        });
 
 
         // 生成Local: DefUnitList的HashMap
-        SimpleLocalDefs sld = new SimpleLocalDefs(cfg);
-        SimpleLocalUses slu = new SimpleLocalUses(body, sld);
-        HashMap<Value, List<Unit>> localDefHashMap = new HashMap<>();
-        body.getLocals().forEach(local -> {
-            if (sld.getDefsOf(local).stream().anyMatch(unit -> !(unit instanceof DefinitionStmt))) {
-                logger.error(String.format("Error occurs: some not DefinitionStmt in def list: %s", sld.getDefsOf(local)));
-            }
-            localDefHashMap.put(local, sld.getDefsOf(local));
-        });
+//        SimpleLocalDefs sld = new SimpleLocalDefs(cfg);
+//        SimpleLocalUses slu = new SimpleLocalUses(body, sld);
+//        HashMap<Value, List<Unit>> localDefHashMap = new HashMap<>();
+//        body.getLocals().forEach(local -> {
+//            if (sld.getDefsOf(local).stream().anyMatch(unit -> !(unit instanceof DefinitionStmt))) {
+//                logger.error(String.format("Error occurs: some not DefinitionStmt in def list: %s", sld.getDefsOf(local)));
+//            }
+//            localDefHashMap.put(local, sld.getDefsOf(local));
+//        });
 
-        Set<Value> locals = new HashSet<>();
-        int lastSize = 0;
-        locals.add(getFirstLocal(body));
-        while (locals.size() > lastSize) {
-            lastSize = locals.size();
-//            List<Local> localList = Lists.newArrayList(locals);
-            localDefHashMap.forEach((local, defList) -> {
-                if (locals.contains(local)) return;
-                defList.forEach(def -> {
-                    DefinitionStmt definitionStmt = (DefinitionStmt) def;
-                    if (locals.contains(definitionStmt.getRightOp())) {
-                        locals.add(definitionStmt.getLeftOp());
-                    } else if (definitionStmt.getRightOp() instanceof PhiExpr) {
-                        PhiExpr phiExpr = (PhiExpr) definitionStmt.getRightOp();
-                        phiExpr.getValues().forEach(value -> {
-                            if (locals.contains(value)) {
-                                locals.add(definitionStmt.getLeftOp());
-                            }
-                        });
-                    }
-                });
-            });
-        }
-        logger.info(locals);
+//        Set<Value> locals = new HashSet<>();
+//        int lastSize = 0;
+//        locals.add(getFirstLocal(body));
+//        while (locals.size() > lastSize) {
+//            lastSize = locals.size();
+////            List<Local> localList = Lists.newArrayList(locals);
+//            localDefHashMap.forEach((local, defList) -> {
+//                if (locals.contains(local)) return;
+//                defList.forEach(def -> {
+//                    DefinitionStmt definitionStmt = (DefinitionStmt) def;
+//                    if (locals.contains(definitionStmt.getRightOp())) {
+//                        locals.add(definitionStmt.getLeftOp());
+//                    } else if (definitionStmt.getRightOp() instanceof PhiExpr) {
+//                        PhiExpr phiExpr = (PhiExpr) definitionStmt.getRightOp();
+//                        phiExpr.getValues().forEach(value -> {
+//                            if (locals.contains(value)) {
+//                                locals.add(definitionStmt.getLeftOp());
+//                            }
+//                        });
+//                    }
+//                });
+//            });
+//        }
+//        logger.info(locals);
     }
 
 

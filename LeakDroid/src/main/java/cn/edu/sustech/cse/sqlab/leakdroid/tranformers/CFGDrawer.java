@@ -32,9 +32,9 @@ public class CFGDrawer extends BodyTransformer {
 
     @Override
     protected void internalTransform(Body body, String s, Map<String, String> map) {
-//        if (true) {
-//            return;
-//        }
+        if (true) {
+            return;
+        }
         ExceptionalUnitGraph cfg = new ExceptionalUnitGraph(body);
 
         DotGraph dotGraph = new DotGraph(String.format("CFG of %s", body.getMethod()));
