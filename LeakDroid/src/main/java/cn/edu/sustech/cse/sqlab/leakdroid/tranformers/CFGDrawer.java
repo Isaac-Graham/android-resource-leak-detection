@@ -5,8 +5,11 @@ import cn.edu.sustech.cse.sqlab.leakdroid.cmdparser.OptionsArgs;
 import cn.edu.sustech.cse.sqlab.leakdroid.tags.ResourceLeakTag;
 import org.apache.log4j.Logger;
 import soot.*;
+import soot.jimple.AssignStmt;
 import soot.toolkits.graph.ExceptionalUnitGraph;
 import soot.util.dot.DotGraph;
+import soot.util.dot.DotGraphEdge;
+import soot.util.dot.DotGraphNode;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -29,29 +32,35 @@ public class CFGDrawer extends BodyTransformer {
 
     @Override
     protected void internalTransform(Body body, String s, Map<String, String> map) {
-        logger.info(String.format("Drawing CFG of %s method", body.getMethod()));
-
+//        if (true) {
+//            return;
+//        }
         ExceptionalUnitGraph cfg = new ExceptionalUnitGraph(body);
 
         DotGraph dotGraph = new DotGraph(String.format("CFG of %s", body.getMethod()));
 
         body.getUnits().forEach(unit -> {
             if (unit.hasTag(ResourceLeakTag.name)) {
-                dotGraph.drawNode(unit.toString()).setAttribute("color", "red");
+                dotGraph.drawNode(getNodeName(unit)).setAttribute("color", "red");
             } else {
-                dotGraph.drawNode(unit.toString()).setAttribute("color", "black");
+                dotGraph.drawNode(getNodeName(unit)).setAttribute("color", "black");
             }
             List<Unit> successors = cfg.getSuccsOf(unit);
             successors.forEach(successor -> {
                 if (unit.hasTag(ResourceLeakTag.name) && successor.hasTag(ResourceLeakTag.name)) {
-                    dotGraph.drawEdge(unit.toString(), successor.toString()).setAttribute("color", "red");
+                    dotGraph.drawEdge(getNodeName(unit), getNodeName(successor)).setAttribute("color", "red");
                 } else {
-                    dotGraph.drawEdge(unit.toString(), successor.toString()).setAttribute("color", "black");
+                    dotGraph.drawEdge(getNodeName(unit), getNodeName(successor)).setAttribute("color", "black");
                 }
             });
         });
 
         boolean leak = body.getUnits().stream().anyMatch(unit -> unit.hasTag(ResourceLeakTag.name));
+        if (!leak && !OptionsArgs.outputAllDot()) {
+            logger.info(String.format("Skip drawing %s", body.getMethod()));
+            return;
+        }
+        logger.info(String.format("Drawing CFG of %s method", body.getMethod()));
         String baseFolder = leak ? "leak" : "not_leak";
         String packageName = body.getMethod().getDeclaringClass().getPackageName();
         Path path = Paths.get(OptionsArgs.getOutputDir().getAbsolutePath(), baseFolder, packageName.replaceAll("\\.", "/"));
@@ -80,4 +89,9 @@ public class CFGDrawer extends BodyTransformer {
                 .replace('<', 'l')
                 .replace('>', 'r');
     }
+
+    private static String getNodeName(Unit unit) {
+        return String.format("%s\n%s", unit.toString(), unit.getClass().toString());
+    }
+
 }

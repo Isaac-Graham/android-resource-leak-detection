@@ -32,7 +32,7 @@ public class RunSootStage extends BaseStage {
         sootOption.set_unfriendly_mode(true);
         sootOption.set_whole_program(true);
         sootOption.set_whole_shimple(true);
-        sootOption.set_verbose(OptionsArgs.isVerboseMode);
+        sootOption.set_verbose(OptionsArgs.isVerboseMode());
         sootOption.set_hierarchy_dirs(true);
         sootOption.set_via_shimple(true);
         sootOption.set_process_multiple_dex(true);

@@ -52,6 +52,13 @@ public class OptionsParser {
                 .type(boolean.class)
                 .desc("Whether override the output directory or not")
                 .build());
+        options.addOption(Option.builder(OptName.shortOutputAllDot)
+                .longOpt(OptName.longOutputAllDot)
+                .argName("output all dot")
+                .hasArg(false)
+                .type(boolean.class)
+                .desc("Whether output all dot file(containing those does not leak)")
+                .build());
         try {
             commandLine = commandLineParser.parse(options, args);
         } catch (ParseException e) {

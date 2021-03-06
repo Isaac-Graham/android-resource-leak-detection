@@ -1,5 +1,6 @@
 package cn.edu.sustech.cse.sqlab.leakdroid.tags;
 
+import cn.edu.sustech.cse.sqlab.leakdroid.exceptions.NonImplementException;
 import soot.tagkit.AttributeValueException;
 import soot.tagkit.Tag;
 
@@ -19,7 +20,6 @@ public class ResourceLeakTag implements Tag {
 
     @Override
     public byte[] getValue() throws AttributeValueException {
-        return null;
-//        throw AttributeValueException
+        throw new NonImplementException("Has not been implemented");
     }
 }

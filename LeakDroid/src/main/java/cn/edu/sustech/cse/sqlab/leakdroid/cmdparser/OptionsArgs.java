@@ -28,7 +28,8 @@ public class OptionsArgs {
     private static ApkFile inputApkFileInfo;
     private static HashMap<Integer, String> androidLibMap;
 
-    public static boolean isVerboseMode = true;
+    private static boolean isVerboseMode = true;
+    private static boolean outputAllDot = false;
     public static List<String> excludedPackageNames = Arrays.asList(
             "android.*",
             "androidx.*",
@@ -58,6 +59,7 @@ public class OptionsArgs {
         initialAndroidSdkFolder();
         initialAndroidLibMap();
         initialTemporaryWorkingDirectory();
+        initialOutputAllDot();
     }
 
     private static void initialOutputDir() {
@@ -140,7 +142,7 @@ public class OptionsArgs {
         }
     }
 
-    public static void initialInputApkFileInfo() {
+    private static void initialInputApkFileInfo() {
         if (inputApkFile == null) {
             return;
         }
@@ -149,6 +151,11 @@ public class OptionsArgs {
         } catch (IOException e) {
             logger.info(String.format("Error occurs: %s", e.toString()));
         }
+    }
+
+    private static void initialOutputAllDot() {
+        CommandLine cmdLine = OptionsParser.getCommandLine();
+        outputAllDot = cmdLine.hasOption(OptName.shortOutputAllDot);
     }
 
     public static File getOutputDir() {
@@ -183,4 +190,11 @@ public class OptionsArgs {
         return inputApkFileInfo;
     }
 
+    public static boolean isVerboseMode() {
+        return isVerboseMode;
+    }
+
+    public static boolean outputAllDot() {
+        return outputAllDot;
+    }
 }
