@@ -4,15 +4,18 @@ import cn.edu.sustech.cse.sqlab.leakdroid.tags.ResourceLeakTag;
 import cn.edu.sustech.cse.sqlab.leakdroid.tranformers.ICFGContext;
 import com.google.common.collect.Lists;
 import org.apache.log4j.Logger;
+import soot.Body;
 import soot.SootClass;
 import soot.Unit;
 import soot.Value;
 import soot.jimple.AssignStmt;
-import soot.jimple.InstanceInvokeExpr;
+import soot.jimple.DefinitionStmt;
 import soot.jimple.InvokeStmt;
 import soot.jimple.internal.AbstractSpecialInvokeExpr;
-import soot.jimple.internal.JInvokeStmt;
+import soot.toolkits.graph.ExceptionalUnitGraph;
 import soot.toolkits.graph.UnitGraph;
+import soot.toolkits.scalar.SimpleLocalDefs;
+import soot.toolkits.scalar.SimpleLocalUses;
 
 import java.io.FileInputStream;
 import java.util.*;
@@ -26,17 +29,19 @@ public class Analyzer {
     private static final Logger logger = Logger.getLogger(Analyzer.class);
     private final Stack<Unit> mainStack;
     private final Stack<Stack<Unit>> assistStack;
-    private final List<String> variableNames;
+    private final List<Value> localValuables;
     private final UnitGraph cfg;
-    private final Set<Value> localValues;
+    private final HashMap<Value, List<Unit>> localDefHashMap;
 
-    public Analyzer(UnitGraph cfg) {
+    public Analyzer(Body body) {
         this.mainStack = new Stack<>();
         this.assistStack = new Stack<>();
-        this.variableNames = new ArrayList<>();
-        this.cfg = cfg;
-        this.localValues = new HashSet<>();
+        this.localValuables = new ArrayList<>();
+        this.cfg = new ExceptionalUnitGraph(body);
+        this.localDefHashMap = new HashMap<>();
+        initialLocalDefHashMap(body);
     }
+
 
     private void initial(InvokeStmt startUnit) {
         mainStack.add(startUnit);
@@ -44,12 +49,22 @@ public class Analyzer {
         cfg.getSuccsOf(startUnit).forEach(successor -> {
             assistStack.peek().add(successor);
         });
-        variableNames.add(getInvokeCaller(startUnit));
-        localValues.add(getFirstVariable(startUnit));
+        localValuables.add(getFirstVariable(startUnit));
     }
 
-    private void addNewPathNode(String nextVariableName, Unit nextUnit) {
-        variableNames.add(nextVariableName);
+    private void initialLocalDefHashMap(Body body) {
+        SimpleLocalDefs sld = new SimpleLocalDefs(this.cfg);
+        SimpleLocalUses slu = new SimpleLocalUses(body, sld);
+        body.getLocals().forEach(local -> {
+            if (sld.getDefsOf(local).stream().anyMatch(unit -> !(unit instanceof DefinitionStmt))) {
+                logger.error(String.format("Error occurs: All should be DefinitionStmt in def list: %s", sld.getDefsOf(local)));
+            }
+            this.localDefHashMap.put(local, sld.getDefsOf(local));
+        });
+    }
+
+    private void addNewPathNode(Value newVariable, Unit nextUnit) {
+        localValuables.add(newVariable);
         mainStack.push(nextUnit);
         assistStack.add(new Stack<>());
         cfg.getSuccsOf(nextUnit).forEach(successor -> {
@@ -77,14 +92,8 @@ public class Analyzer {
             Stack<Unit> assistStackTop = assistStack.peek();
             if (!assistStackTop.empty()) {
                 Unit nextUnit = assistStackTop.pop();
-                String nextVariableName = "";
-                if (nextUnit instanceof AssignStmt) {
-                    AssignStmt assignStmt = (AssignStmt) nextUnit;
-                    if (variableNames.contains(assignStmt.getRightOp().toString())) {
-                        nextVariableName = assignStmt.getLeftOp().toString();
-                    }
-                }
-                addNewPathNode(nextVariableName, nextUnit);
+                Value localValueThisUnit = getLocalValueFromDefinitions(nextUnit);
+                addNewPathNode(localValueThisUnit, nextUnit);
 
             } else {
                 dfsCallBack();
@@ -93,6 +102,7 @@ public class Analyzer {
         return false;
     }
 
+    // TODO: 完善该方法
     public static boolean isRequest(Unit unit) {
         if (ICFGContext.icfg.isCallStmt(unit)) {
             if (unit instanceof InvokeStmt) {
@@ -105,6 +115,7 @@ public class Analyzer {
         return false;
     }
 
+    // TODO: 完善该方法
     public static boolean isRelease(Unit unit) {
         if (ICFGContext.icfg.isCallStmt(unit)) {
             if (unit instanceof InvokeStmt) {
@@ -137,21 +148,29 @@ public class Analyzer {
             logger.debug(String.format("Path: %s", Lists.newArrayList(mainStack)));
     }
 
-    private static String getInvokeCaller(InvokeStmt invokeStmt) {
-        String stmt = invokeStmt.toString();
-        return stmt.substring(stmt.indexOf(' '), stmt.indexOf('.'));
-    }
-
     private void dfsCallBack() {
         debugPrintMainStack();
         mainStack.pop();
         assistStack.pop();
-        variableNames.remove(variableNames.size() - 1);
+        localValuables.remove(localValuables.size() - 1);
     }
 
     private static Value getFirstVariable(InvokeStmt startInvokeStmt) {
         AbstractSpecialInvokeExpr abstractStartSpecialInvokeExpr = (AbstractSpecialInvokeExpr) startInvokeStmt.getInvokeExpr();
         return abstractStartSpecialInvokeExpr.getBase();
     }
+
+    private Value getLocalValueFromDefinitions(Unit nextUnit) {
+        Set<Map.Entry<Value, List<Unit>>> entrySet = this.localDefHashMap.entrySet();
+        for (Map.Entry<Value, List<Unit>> valueListEntry : entrySet) {
+            for (Unit def : valueListEntry.getValue()) {
+                if (def == nextUnit) {
+                    return ((DefinitionStmt) def).getLeftOp();
+                }
+            }
+        }
+        return null;
+    }
+
 
 }
