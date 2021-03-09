@@ -6,6 +6,7 @@ import org.apache.log4j.Logger;
 import soot.SceneTransformer;
 import soot.jimple.toolkits.ide.icfg.JimpleBasedInterproceduralCFG;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -20,7 +21,7 @@ public class ICFGGenerator extends SceneTransformer {
 
     @Override
     protected void internalTransform(String s, Map<String, String> map) {
-        JimpleBasedInterproceduralCFG icfg = new JimpleBasedInterproceduralCFG();
-        ICFGContext.icfg = icfg;
+        ICFGContext.icfg = new JimpleBasedInterproceduralCFG();
+        ICFGContext.cfgGraphs = new HashMap<>();
     }
 }

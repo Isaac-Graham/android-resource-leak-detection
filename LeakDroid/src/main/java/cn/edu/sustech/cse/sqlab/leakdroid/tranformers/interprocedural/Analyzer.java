@@ -79,7 +79,6 @@ public class Analyzer {
      */
     public boolean isLeakage(InvokeStmt startUnit) {
         initial(startUnit);
-
         while (!mainStack.empty()) {
             Unit currentUnit = mainStack.peek();
             if (ICFGContext.icfg.isExitStmt(currentUnit)) {
@@ -93,6 +92,10 @@ public class Analyzer {
             if (!assistStackTop.empty()) {
                 Unit nextUnit = assistStackTop.pop();
                 Value localValueThisUnit = getLocalValueFromDefinitions(nextUnit);
+                if (nextUnit instanceof InvokeStmt) {
+                    logger.info(nextUnit.getClass());
+                    logger.info(nextUnit);
+                }
                 addNewPathNode(localValueThisUnit, nextUnit);
 
             } else {

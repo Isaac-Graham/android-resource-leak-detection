@@ -5,11 +5,9 @@ import cn.edu.sustech.cse.sqlab.leakdroid.cmdparser.OptionsArgs;
 import cn.edu.sustech.cse.sqlab.leakdroid.tags.ResourceLeakTag;
 import org.apache.log4j.Logger;
 import soot.*;
-import soot.jimple.AssignStmt;
 import soot.toolkits.graph.ExceptionalUnitGraph;
+import soot.util.cfgcmd.CFGToDotGraph;
 import soot.util.dot.DotGraph;
-import soot.util.dot.DotGraphEdge;
-import soot.util.dot.DotGraphNode;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -17,7 +15,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * @author Isaac Chen
@@ -35,8 +32,12 @@ public class CFGDrawer extends BodyTransformer {
         if (true) {
             return;
         }
-        ExceptionalUnitGraph cfg = new ExceptionalUnitGraph(body);
+        DotGraph dotGraph = generateDotGraphPlanA(body);
+        printDotGraph(body, dotGraph);
+    }
 
+    private static DotGraph generateDotGraphPlanA(Body body) {
+        ExceptionalUnitGraph cfg = new ExceptionalUnitGraph(body);
         DotGraph dotGraph = new DotGraph(String.format("CFG of %s", body.getMethod()));
 
         body.getUnits().forEach(unit -> {
@@ -54,7 +55,27 @@ public class CFGDrawer extends BodyTransformer {
                 }
             });
         });
+        return dotGraph;
+    }
 
+    private static DotGraph generateDotGraphPlanB(Body body) {
+        ExceptionalUnitGraph cfg = new ExceptionalUnitGraph(body);
+        return new CFGToDotGraph().drawCFG(cfg);
+    }
+
+    private static String getFileName(SootMethod sootMethod) {
+        return String.format("%s_%s.dot",
+                sootMethod.getDeclaringClass().toString(),
+                sootMethod.getName())
+                .replace('<', 'l')
+                .replace('>', 'r');
+    }
+
+    private static String getNodeName(Unit unit) {
+        return String.format("%s\n%s", unit.toString(), unit.getClass().toString());
+    }
+
+    private static void printDotGraph(Body body, DotGraph dotGraph) {
         boolean leak = body.getUnits().stream().anyMatch(unit -> unit.hasTag(ResourceLeakTag.name));
         if (!leak && !OptionsArgs.outputAllDot()) {
             logger.info(String.format("Skip drawing %s", body.getMethod()));
@@ -80,18 +101,6 @@ public class CFGDrawer extends BodyTransformer {
                 ).toString());
 
         logger.info(String.format("CFG of %s method drawn", body.getMethod().toString()));
-    }
-
-    private static String getFileName(SootMethod sootMethod) {
-        return String.format("%s_%s.dot",
-                sootMethod.getDeclaringClass().toString(),
-                sootMethod.getName())
-                .replace('<', 'l')
-                .replace('>', 'r');
-    }
-
-    private static String getNodeName(Unit unit) {
-        return String.format("%s\n%s", unit.toString(), unit.getClass().toString());
     }
 
 }
