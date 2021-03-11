@@ -1,21 +1,17 @@
 package cn.edu.sustech.cse.sqlab.leakdroid.tranformers.interprocedural;
 
 import cn.edu.sustech.cse.sqlab.leakdroid.annotation.PhaseName;
-import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.PathExtractor;
-import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.entities.CFGPath;
+import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.utils.pathutils.LoopExitPathUtil;
+import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.utils.pathutils.LoopOncePathUtil;
+import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.utils.pathutils.LoopPathUtil;
 import cn.edu.sustech.cse.sqlab.leakdroid.tranformers.ICFGContext;
 import cn.edu.sustech.cse.sqlab.leakdroid.util.SootMethodUtil;
-import com.google.common.collect.Lists;
 import org.apache.log4j.Logger;
 import soot.*;
-import soot.jimple.*;
-import soot.jimple.toolkits.annotation.logic.Loop;
 import soot.jimple.toolkits.annotation.logic.LoopFinder;
 import soot.toolkits.graph.ExceptionalUnitGraph;
 
 import java.util.*;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
 
 /**
  * @author Isaac Chen
@@ -29,17 +25,27 @@ public class ICFGDetector extends BodyTransformer {
 
     @Override
     protected void internalTransform(Body body, String s, Map<String, String> map) {
-        if (!body.getMethod().getName().contains("singleWhileLoopTest")) return;
+        if (!body.getMethod().getName().contains("nestedLoopTest")) return;
         if (body.getMethod().toString().contains(SootMethod.staticInitializerName)) return;
         SootMethodUtil.ensureSSA(body.getMethod());
         SootMethodUtil.updateLocalName(body.getMethod());
+
+        ICFGContext.cfgGraphs.put(body, new ExceptionalUnitGraph(body));
+        ICFGContext.bodyLoops.put(body, new LoopFinder().getLoops(body));
+
+
 //        new LoopFinder().getLoops(body).forEach(loop -> {
-//            List<Stmt> lss = loop.getLoopStatements();
-//            logger.info(lss);
-////            loop.getLoopExits().forEach(loopExit -> {
-////                logger.info()
-////            });
+//            Stmt head = loop.getHead();
+//            new LoopPathUtil(head).runPath().forEach(path -> {
+//                logger.info(path.getCFGPath());
+//            });
 //        });
+        new LoopFinder().getLoops(body).forEach(loop -> {
+
+            new LoopPathUtil(loop.getHead(), loop).runPath().forEach(basePathUtil -> {
+                logger.info(basePathUtil.getCFGPath());
+            });
+        });
 
 //        body.getUnits().stream().filter(Analyzer::isRequest).forEach(unit -> {
 //            if (new Analyzer(body).isLeakage((InvokeStmt) unit)) {
@@ -47,11 +53,11 @@ public class ICFGDetector extends BodyTransformer {
 //            }
 //        });
 
-//        ICFGContext.cfgGraphs.put(body, new ExceptionalUnitGraph(body));
+
 //        List<Unit> units = new ArrayList<>(body.getUnits());
 //        Set<CFGPath> paths = PathExtractor.extractPath(units.get(0));
 //        paths.forEach(logger::info);
-        new B().funcA();
+//        new B().funcA();
 //
 //
 //        Test test = new Test();
@@ -66,6 +72,11 @@ public class ICFGDetector extends BodyTransformer {
 //        logger.info("###");
 //        test.printStackInfo();
 //        test02.printStackInfo();
+
+    }
+
+
+    abstract class E {
 
     }
 
@@ -86,6 +97,26 @@ public class ICFGDetector extends BodyTransformer {
 
         protected void funcA() {
             super.funcA();
+        }
+    }
+
+    class C {
+        protected A a;
+
+        C() {
+            a = new A();
+        }
+
+        void run() {
+            a.funcB();
+        }
+    }
+
+    class D extends C {
+        protected B a;
+
+        D() {
+            a = new B();
         }
     }
 }

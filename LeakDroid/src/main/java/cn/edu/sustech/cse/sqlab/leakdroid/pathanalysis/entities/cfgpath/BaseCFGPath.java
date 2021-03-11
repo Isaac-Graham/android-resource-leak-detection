@@ -1,7 +1,5 @@
-package cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.entities;
+package cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.entities.cfgpath;
 
-import cn.edu.sustech.cse.sqlab.leakdroid.tranformers.ICFGContext;
-import com.google.common.collect.Lists;
 import soot.Unit;
 
 import java.util.ArrayList;
@@ -10,37 +8,35 @@ import java.util.List;
 /**
  * @author Isaac Chen
  * @email ccccym666@gmail.com
- * @date 2021/3/9 14:50
+ * @date 2021/3/11 18:50
  */
-public class CFGPath implements Cloneable {
-    private List<Unit> path;
+public abstract class BaseCFGPath implements Cloneable {
+    protected List<Unit> path;
 
-    public CFGPath() {
+    public BaseCFGPath() {
         this.path = new ArrayList<>();
     }
 
     @Override
     public Object clone() {
-        CFGPath cfgPath = null;
+        BaseCFGPath baseCFGPath = null;
         try {
-            cfgPath = (CFGPath) super.clone();
-            cfgPath.path = new ArrayList<>(path);
+            baseCFGPath = (BaseCFGPath) super.clone();
+            baseCFGPath.path = new ArrayList<>(path);
         } catch (CloneNotSupportedException e) {
             e.printStackTrace();
         }
-        return cfgPath;
+        return baseCFGPath;
     }
 
-    public boolean isEnd() {
-        return ICFGContext.icfg.isExitStmt(path.get(path.size() - 1));
-    }
+    public abstract boolean isEnd();
 
     public boolean isEmpty() {
         return path.isEmpty();
     }
 
-    public boolean equals(CFGPath cfgPath) {
-        List<Unit> anotherPath = cfgPath.getPath();
+    public boolean equals(BaseCFGPath baseCFGPath) {
+        List<Unit> anotherPath = baseCFGPath.getPath();
         if (anotherPath.size() != path.size()) {
             return false;
         }
@@ -73,11 +69,15 @@ public class CFGPath implements Cloneable {
         return path.get(index);
     }
 
-    public void mergeCFGPath(CFGPath cfgPath) {
-        this.path.addAll(cfgPath.path);
+    public void mergeCFGPath(BaseCFGPath baseCFGPath) {
+        this.path.addAll(baseCFGPath.path);
     }
 
     public String toString() {
         return path.toString();
+    }
+
+    public Unit getPathTail() {
+        return path.get(path.size() - 1);
     }
 }

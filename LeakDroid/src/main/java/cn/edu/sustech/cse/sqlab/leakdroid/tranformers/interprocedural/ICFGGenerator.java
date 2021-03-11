@@ -23,5 +23,6 @@ public class ICFGGenerator extends SceneTransformer {
     protected void internalTransform(String s, Map<String, String> map) {
         ICFGContext.icfg = new JimpleBasedInterproceduralCFG();
         ICFGContext.cfgGraphs = new HashMap<>();
+        ICFGContext.bodyLoops = new HashMap<>();
     }
 }
