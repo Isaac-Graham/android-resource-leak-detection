@@ -39,6 +39,11 @@ public class LoopPathUtil extends BasePathUtil implements Cloneable {
     }
 
     @Override
+    protected void dealLoop(Unit nextUnit, List<BasePathUtil> basePathUtils) {
+        // ignore
+    }
+
+    @Override
     public Object clone() {
         return (LoopPathUtil) super.clone();
     }

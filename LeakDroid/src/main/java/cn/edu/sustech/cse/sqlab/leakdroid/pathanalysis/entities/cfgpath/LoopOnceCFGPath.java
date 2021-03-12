@@ -23,7 +23,7 @@ public class LoopOnceCFGPath extends BaseCFGPath implements Cloneable {
 
     @Override
     public boolean isEnd() {
-        return currentLoop.getBackJumpStmt() == path.get(path.size() - 1);
+        return currentLoop.getBackJumpStmt() == this.getPathTail();
     }
 
 }

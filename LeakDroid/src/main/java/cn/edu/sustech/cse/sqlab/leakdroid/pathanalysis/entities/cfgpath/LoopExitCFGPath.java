@@ -21,6 +21,6 @@ public class LoopExitCFGPath extends BaseCFGPath implements Cloneable {
 
     @Override
     public boolean isEnd() {
-        return currentLoop.getLoopExits().contains(path.get(path.size() - 1));
+        return currentLoop.getLoopExits().contains(this.getPathTail());
     }
 }

@@ -1,9 +1,7 @@
 package cn.edu.sustech.cse.sqlab.leakdroid.tranformers.interprocedural;
 
 import cn.edu.sustech.cse.sqlab.leakdroid.annotation.PhaseName;
-import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.utils.pathutils.LoopExitPathUtil;
-import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.utils.pathutils.LoopOncePathUtil;
-import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.utils.pathutils.LoopPathUtil;
+import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.utils.pathutils.*;
 import cn.edu.sustech.cse.sqlab.leakdroid.tranformers.ICFGContext;
 import cn.edu.sustech.cse.sqlab.leakdroid.util.SootMethodUtil;
 import org.apache.log4j.Logger;
@@ -12,6 +10,7 @@ import soot.jimple.toolkits.annotation.logic.LoopFinder;
 import soot.toolkits.graph.ExceptionalUnitGraph;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author Isaac Chen
@@ -40,12 +39,15 @@ public class ICFGDetector extends BodyTransformer {
 //                logger.info(path.getCFGPath());
 //            });
 //        });
-        new LoopFinder().getLoops(body).forEach(loop -> {
-
-            new LoopPathUtil(loop.getHead(), loop).runPath().forEach(basePathUtil -> {
-                logger.info(basePathUtil.getCFGPath());
-            });
-        });
+        List<Unit> units = new ArrayList<>(body.getUnits());
+        List<BasePathUtil> paths = new PathUtil(units.get(0)).runPath();
+        int a = 0;
+//        new LoopFinder().getLoops(body).forEach(loop -> {
+//
+//            new LoopPathUtil(loop.getHead(), loop).runPath().forEach(basePathUtil -> {
+//                logger.info(basePathUtil.getCFGPath());
+//            });
+//        });
 
 //        body.getUnits().stream().filter(Analyzer::isRequest).forEach(unit -> {
 //            if (new Analyzer(body).isLeakage((InvokeStmt) unit)) {

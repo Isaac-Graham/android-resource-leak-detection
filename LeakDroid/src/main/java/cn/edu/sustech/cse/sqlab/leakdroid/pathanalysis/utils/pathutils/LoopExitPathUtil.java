@@ -33,30 +33,19 @@ public class LoopExitPathUtil extends BasePathUtil implements Cloneable {
 
     @Override
     public List<BasePathUtil> runPath() {
-        List<BasePathUtil> basePathUtils = new ArrayList<>();
-        while (!pathStatus.isEnd()) {
-            Stack<Unit> neighborStackTop = pathStatus.getNeighborTop();
-            if (neighborStackTop.empty()) {
-                if (cfgPath.isEnd()) {
-                    basePathUtils.add((BasePathUtil) this.clone());
-                }
-                callBack();
-            } else {
-                Unit nextUnit = neighborStackTop.pop();
-                if (LoopUtil.isLoopHead(nextUnit)) {
-                    List<BasePathUtil> loopsPathUtils = LoopUtil.getLoopPaths(nextUnit);
-                    List<BasePathUtil> mergedPathUtils = this.mergePathUtils(loopsPathUtils);
-                    for (BasePathUtil mergedPathUtil : mergedPathUtils) {
-                        Unit tail = mergedPathUtil.getPathTail();
-                        mergedPathUtil.callBack();
-                        basePathUtils.addAll(mergedPathUtil.mergePathUtils(new LoopExitPathUtil(tail, currentLoop).runPath()));
-                    }
-                } else {
-                    this.updatePath(nextUnit);
-                }
-            }
-        }
+        List<BasePathUtil> basePathUtils = super.runPath();
         return addTargetOfExitStmt(basePathUtils);
+    }
+
+    @Override
+    protected void dealLoop(Unit nextUnit, List<BasePathUtil> basePathUtils) {
+        List<BasePathUtil> loopsPathUtils = LoopUtil.getLoopPaths(nextUnit);
+        List<BasePathUtil> mergedPathUtils = this.mergePathUtils(loopsPathUtils);
+        for (BasePathUtil mergedPathUtil : mergedPathUtils) {
+            Unit tail = mergedPathUtil.getPathTail();
+            mergedPathUtil.callBack();
+            basePathUtils.addAll(mergedPathUtil.mergePathUtils(new LoopExitPathUtil(tail, currentLoop).runPath()));
+        }
     }
 
     private List<BasePathUtil> addTargetOfExitStmt(List<BasePathUtil> basePathUtils) {

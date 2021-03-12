@@ -42,11 +42,6 @@ public class LoopExitPathStatus extends BasePathStatus implements Cloneable {
                     successors.push(successor);
                 }
             }
-//            cfg.getSuccsOf(unit).forEach(successor -> {
-//                if (currentLoop.getLoopStatements().contains(successor)) {
-//                    successors.push(successor);
-//                }
-//            });
             this.neighborStack.push(successors);
         }
     }

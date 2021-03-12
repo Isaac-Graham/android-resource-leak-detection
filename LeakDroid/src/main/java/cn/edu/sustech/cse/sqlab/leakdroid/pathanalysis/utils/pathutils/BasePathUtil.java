@@ -2,6 +2,7 @@ package cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.utils.pathutils;
 
 import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.entities.cfgpath.BaseCFGPath;
 import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.entities.pathstatus.BasePathStatus;
+import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.utils.LoopUtil;
 import soot.Unit;
 
 import java.util.ArrayList;
@@ -30,7 +31,28 @@ public abstract class BasePathUtil implements Cloneable {
         return basePathUtil;
     }
 
-    public abstract List<BasePathUtil> runPath();
+    public List<BasePathUtil> runPath() {
+        List<BasePathUtil> basePathUtils = new ArrayList<>();
+        while (!pathStatus.isEnd()) {
+            Stack<Unit> neighborStackTop = pathStatus.getNeighborTop();
+            if (neighborStackTop.empty()) {
+                if (cfgPath.isEnd()) {
+                    basePathUtils.add((BasePathUtil) this.clone());
+                }
+                callBack();
+            } else {
+                Unit nextUnit = neighborStackTop.pop();
+                if (LoopUtil.isLoopHead(nextUnit)) {
+                    dealLoop(nextUnit, basePathUtils);
+                } else {
+                    this.updatePath(nextUnit);
+                }
+            }
+        }
+        return basePathUtils;
+    }
+
+    protected abstract void dealLoop(Unit nextUnit, List<BasePathUtil> basePathUtils);
 
     protected void callBack() {
         this.pathStatus.callBack();

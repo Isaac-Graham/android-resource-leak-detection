@@ -18,7 +18,7 @@ import java.util.Set;
  * @date 2021/3/11 20:16
  */
 public class LoopUtil {
-    private static HashMap<Unit, List<BasePathUtil>> loopPathsMap = new HashMap<>();
+    private static final HashMap<Unit, List<BasePathUtil>> loopPathsMap = new HashMap<>();
 
     public static boolean isLoopHead(Unit unit) {
         Body body = ICFGContext.icfg.getBodyOf(unit);

@@ -1,7 +1,9 @@
 package cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.utils.pathutils;
 
-import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.entities.cfgpath.LoopOnceCFGPath;
-import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.entities.pathstatus.LoopOncePathStatus;
+import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.entities.cfgpath.CFGPath;
+import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.entities.cfgpath.LoopExitCFGPath;
+import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.entities.pathstatus.LoopExitPathStatus;
+import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.entities.pathstatus.PathStatus;
 import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.utils.LoopUtil;
 import soot.Unit;
 import soot.jimple.toolkits.annotation.logic.Loop;
@@ -13,22 +15,18 @@ import java.util.Stack;
 /**
  * @author Isaac Chen
  * @email ccccym666@gmail.com
- * @date 2021/3/11 17:15
+ * @date 2021/3/11 23:04
  */
-public class LoopOncePathUtil extends BasePathUtil implements Cloneable {
-    private Loop currentLoop;
-
-    public LoopOncePathUtil(Loop currentLoop) {
-        this.currentLoop = currentLoop;
-        super.pathStatus = new LoopOncePathStatus(currentLoop);
-        super.cfgPath = new LoopOnceCFGPath(currentLoop);
+public class PathUtil extends BasePathUtil implements Cloneable {
+    public PathUtil() {
+        this.pathStatus = new PathStatus();
+        this.cfgPath = new CFGPath();
     }
 
-    public LoopOncePathUtil(Unit startUnit, Loop currentLoop) {
-        this(currentLoop);
+    public PathUtil(Unit startUnit) {
+        this();
         this.updatePath(startUnit);
     }
-
 
     @Override
     protected void dealLoop(Unit nextUnit, List<BasePathUtil> basePathUtils) {
@@ -37,7 +35,12 @@ public class LoopOncePathUtil extends BasePathUtil implements Cloneable {
         for (BasePathUtil mergedPathUtil : mergedPathUtils) {
             Unit tail = mergedPathUtil.getPathTail();
             mergedPathUtil.callBack();
-            basePathUtils.addAll(mergedPathUtil.mergePathUtils(new LoopOncePathUtil(tail, currentLoop).runPath()));
+            basePathUtils.addAll(mergedPathUtil.mergePathUtils(new PathUtil(tail).runPath()));
         }
+    }
+
+    @Override
+    public Object clone() {
+        return (PathUtil) super.clone();
     }
 }
