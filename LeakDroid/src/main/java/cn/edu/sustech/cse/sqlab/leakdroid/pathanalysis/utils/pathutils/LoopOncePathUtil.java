@@ -37,6 +37,10 @@ public class LoopOncePathUtil extends BasePathUtil implements Cloneable {
         for (BasePathUtil mergedPathUtil : mergedPathUtils) {
             Unit tail = mergedPathUtil.getPathTail();
             mergedPathUtil.callBack();
+            // The
+            if (mergedPathUtil.cfgPath.getPath().contains(tail)) {
+                continue;
+            }
             basePathUtils.addAll(mergedPathUtil.mergePathUtils(new LoopOncePathUtil(tail, currentLoop).runPath()));
         }
     }

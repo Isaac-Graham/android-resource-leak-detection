@@ -35,6 +35,7 @@ public class PathUtil extends BasePathUtil implements Cloneable {
         for (BasePathUtil mergedPathUtil : mergedPathUtils) {
             Unit tail = mergedPathUtil.getPathTail();
             mergedPathUtil.callBack();
+            if (mergedPathUtil.getCFGPath().getPath().contains(tail)) continue;
             basePathUtils.addAll(mergedPathUtil.mergePathUtils(new PathUtil(tail).runPath()));
         }
     }

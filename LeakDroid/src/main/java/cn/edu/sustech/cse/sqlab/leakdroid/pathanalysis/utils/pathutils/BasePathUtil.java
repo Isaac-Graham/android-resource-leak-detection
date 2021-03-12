@@ -78,9 +78,13 @@ public abstract class BasePathUtil implements Cloneable {
 
     protected List<BasePathUtil> mergePathUtils(List<BasePathUtil> paths) {
         List<BasePathUtil> mergedPaths = new ArrayList<>();
-        paths.forEach(path -> {
-            mergedPaths.add(this.mergePathUtil(path));
-        });
+        if (paths.isEmpty()) {
+            mergedPaths.add((BasePathUtil) this.clone());
+        } else {
+            paths.forEach(path -> {
+                mergedPaths.add(this.mergePathUtil(path));
+            });
+        }
         return mergedPaths;
     }
 
