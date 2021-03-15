@@ -1,9 +1,6 @@
 package cn.edu.sustech.cse.sqlab.leakdroid.stages;
 
-import cn.edu.sustech.cse.sqlab.leakdroid.tranformers.CFGDrawer;
-import cn.edu.sustech.cse.sqlab.leakdroid.tranformers.UnloadableBodiesEliminator;
-import cn.edu.sustech.cse.sqlab.leakdroid.tranformers.interprocedural.ICFGGenerator;
-import cn.edu.sustech.cse.sqlab.leakdroid.tranformers.interprocedural.ICFGDetector;
+import cn.edu.sustech.cse.sqlab.leakdroid.tranformers.*;
 import cn.edu.sustech.cse.sqlab.leakdroid.util.PackManagerUtil;
 import org.apache.log4j.Logger;
 import soot.G;
@@ -75,7 +72,7 @@ public class RunSootStage extends BaseStage {
         PackManagerUtil.addTransformation(PackManager.v(), new UnloadableBodiesEliminator());
         PackManagerUtil.addTransformation(PackManager.v(), new ICFGGenerator());
 //        PackManagerUtil.addTransformation(PackManager.v(), new ICFGGenerator());
-        PackManagerUtil.addTransformation(PackManager.v(), new ICFGDetector());
+        PackManagerUtil.addTransformation(PackManager.v(), new TestICFG());
         PackManagerUtil.addTransformation(PackManager.v(), new CFGDrawer());
 //        PackManagerUtil.addTransformation(PackManager.v(), new Test());
 //        PackManager.v().

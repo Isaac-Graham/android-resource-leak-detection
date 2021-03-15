@@ -29,9 +29,9 @@ public class CFGDrawer extends BodyTransformer {
 
     @Override
     protected void internalTransform(Body body, String s, Map<String, String> map) {
-//        if (true) {
-//            return;
-//        }
+        if (true) {
+            return;
+        }
         DotGraph dotGraph = generateDotGraphPlanA(body);
         printDotGraph(body, dotGraph);
     }

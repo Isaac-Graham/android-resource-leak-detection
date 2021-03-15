@@ -1,6 +1,8 @@
 package cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.entities.cfgpath;
 
-import cn.edu.sustech.cse.sqlab.leakdroid.tranformers.ICFGContext;
+import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.ICFGContext;
+import soot.SootMethod;
+import soot.toolkits.graph.UnitGraph;
 
 /**
  * @author Isaac Chen
@@ -19,6 +21,7 @@ public class CFGPath extends BaseCFGPath implements Cloneable {
 
     @Override
     public boolean isEnd() {
-        return ICFGContext.icfg.isExitStmt(this.getPathTail());
+        UnitGraph unitGraph = ICFGContext.getCFGFromUnit(this.getPathTail());
+        return unitGraph.getTails().contains(this.getPathTail());
     }
 }

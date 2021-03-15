@@ -3,6 +3,8 @@ package cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.analyzer;
 import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.entities.cfgpath.BaseCFGPath;
 import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.utils.pathutils.BasePathUtil;
 import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.utils.pathutils.PathUtil;
+import soot.Body;
+import soot.SootMethod;
 import soot.Unit;
 
 import java.util.ArrayList;
@@ -15,8 +17,8 @@ import java.util.List;
  */
 public class PathExtractor {
 
-    public static List<BaseCFGPath> extractPath(Unit unit) {
-        List<BasePathUtil> paths = new PathUtil(unit).runPath();
+    public static List<BaseCFGPath> extractPath(Unit unit, SootMethod sootMethod) {
+        List<BasePathUtil> paths = new PathUtil(unit, sootMethod).runPath();
         List<BaseCFGPath> res = new ArrayList<>();
         paths.forEach(path -> {
             res.add(path.getCFGPath());

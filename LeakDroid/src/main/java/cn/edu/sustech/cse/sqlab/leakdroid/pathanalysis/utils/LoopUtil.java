@@ -2,8 +2,9 @@ package cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.utils;
 
 import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.utils.pathutils.BasePathUtil;
 import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.utils.pathutils.LoopPathUtil;
-import cn.edu.sustech.cse.sqlab.leakdroid.tranformers.ICFGContext;
+import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.ICFGContext;
 import soot.Body;
+import soot.SootMethod;
 import soot.Unit;
 import soot.jimple.toolkits.annotation.logic.Loop;
 
@@ -20,24 +21,19 @@ import java.util.Set;
 public class LoopUtil {
     private static final HashMap<Unit, List<BasePathUtil>> loopPathsMap = new HashMap<>();
 
-    public static boolean isLoopHead(Unit unit) {
-        Body body = ICFGContext.icfg.getBodyOf(unit);
-        if (!ICFGContext.bodyLoops.containsKey(body)) {
-            return false;
-        }
-        Set<Loop> loops = ICFGContext.bodyLoops.get(body);
-        if (loops == null) {
+    public static boolean isLoopHead(Unit unit, SootMethod sootMethod) {
+        Set<Loop> loops = ICFGContext.getLoopsFromMethod(sootMethod);
+        if (loops == null || loops.isEmpty()) {
             return false;
         }
         return loops.stream().anyMatch(loop -> loop.getHead() == unit);
     }
 
-    public static Loop getLoopFromHead(Unit unit) {
-        if (!isLoopHead(unit)) {
+    public static Loop getLoopFromHead(Unit unit, SootMethod sootMethod) {
+        if (!isLoopHead(unit, sootMethod)) {
             return null;
         }
-        Body body = ICFGContext.icfg.getBodyOf(unit);
-        Set<Loop> loops = ICFGContext.bodyLoops.get(body);
+        Set<Loop> loops = ICFGContext.getLoopsFromMethod(sootMethod);
         for (Loop loop : loops) {
             if (loop.getHead() == unit) {
                 return loop;
@@ -46,15 +42,15 @@ public class LoopUtil {
         return null;
     }
 
-    public static List<BasePathUtil> getLoopPaths(Unit headUnit) {
-        if (!isLoopHead(headUnit)) {
+    public static List<BasePathUtil> getLoopPaths(Unit headUnit, SootMethod sootMethod) {
+        if (!isLoopHead(headUnit, sootMethod)) {
             return new ArrayList<>();
         }
         if (loopPathsMap.containsKey(headUnit)) {
             return loopPathsMap.get(headUnit);
         }
-        Loop loop = getLoopFromHead(headUnit);
-        List<BasePathUtil> res = new LoopPathUtil(headUnit, loop).runPath();
+        Loop loop = getLoopFromHead(headUnit, sootMethod);
+        List<BasePathUtil> res = new LoopPathUtil(headUnit, loop, sootMethod).runPath();
         res.forEach(BasePathUtil::clearPathStatus);
         loopPathsMap.put(headUnit, res);
         return res;

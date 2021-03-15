@@ -1,19 +1,23 @@
 package cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.analyzer;
 
 import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.entities.cfgpath.BaseCFGPath;
+import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.utils.InterProcedureUtil;
 import cn.edu.sustech.cse.sqlab.leakdroid.tags.ResourceLeakTag;
+import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.ICFGContext;
 import cn.edu.sustech.cse.sqlab.leakdroid.util.ResourceUtil;
 import org.apache.log4j.Logger;
 import soot.Body;
+import soot.SootMethod;
 import soot.Unit;
 import soot.Value;
 import soot.jimple.DefinitionStmt;
 import soot.jimple.InvokeStmt;
+import soot.jimple.ParameterRef;
+import soot.jimple.internal.AbstractDefinitionStmt;
 import soot.jimple.internal.AbstractSpecialInvokeExpr;
+import soot.jimple.internal.JSpecialInvokeExpr;
 import soot.toolkits.graph.ExceptionalUnitGraph;
-import soot.toolkits.graph.UnitGraph;
 import soot.toolkits.scalar.SimpleLocalDefs;
-import soot.toolkits.scalar.SimpleLocalUses;
 
 import java.util.*;
 
@@ -24,25 +28,31 @@ import java.util.*;
  */
 public class PathAnalyzer {
     private static final Logger logger = Logger.getLogger(PathAnalyzer.class);
-    private final UnitGraph cfg;
     private final HashMap<Value, List<Unit>> localDefHashMap;
     private final List<BaseCFGPath> paths;
+    private final SootMethod sootMethod;
 
-    public PathAnalyzer(Body body, List<BaseCFGPath> paths) {
-        this.cfg = new ExceptionalUnitGraph(body);
+    public PathAnalyzer(SootMethod sootMethod, List<BaseCFGPath> paths) {
+        this.sootMethod = sootMethod;
         this.localDefHashMap = new HashMap<>();
         this.paths = paths;
-        initialLocalDefHashMap(body);
+        initialLocalDefHashMap();
     }
 
-    public void analyze() {
-        paths.forEach(this::analyze);
+    public boolean analyze() {
+        boolean res = false;
+        for (BaseCFGPath path : paths) {
+            if (this.analyze(path)) {
+                res = true;
+            }
+        }
+        return res;
     }
 
-    private void initialLocalDefHashMap(Body body) {
-        SimpleLocalDefs sld = new SimpleLocalDefs(this.cfg);
-        SimpleLocalUses slu = new SimpleLocalUses(body, sld);
-        body.getLocals().forEach(local -> {
+    private void initialLocalDefHashMap() {
+        ExceptionalUnitGraph cfg = ICFGContext.getCFGFromMethod(sootMethod);
+        SimpleLocalDefs sld = new SimpleLocalDefs(cfg);
+        sootMethod.getActiveBody().getLocals().forEach(local -> {
             if (sld.getDefsOf(local).stream().anyMatch(unit -> !(unit instanceof DefinitionStmt))) {
                 logger.error(String.format("Error occurs: All should be DefinitionStmt in def list: %s", sld.getDefsOf(local)));
             }
@@ -50,21 +60,34 @@ public class PathAnalyzer {
         });
     }
 
-    private static Value getFirstVariable(InvokeStmt startInvokeStmt) {
-        AbstractSpecialInvokeExpr abstractStartSpecialInvokeExpr = (AbstractSpecialInvokeExpr) startInvokeStmt.getInvokeExpr();
-        return abstractStartSpecialInvokeExpr.getBase();
+    private static Value getFirstVariable(Unit unit) {
+        if (unit instanceof InvokeStmt) {
+            InvokeStmt invokeStmt = (InvokeStmt) unit;
+            logger.info(invokeStmt.getInvokeExpr().getClass());
+            AbstractSpecialInvokeExpr abstractStartSpecialInvokeExpr = (AbstractSpecialInvokeExpr) invokeStmt.getInvokeExpr();
+            return abstractStartSpecialInvokeExpr.getBase();
+        } else if (unit instanceof AbstractDefinitionStmt) {
+            AbstractDefinitionStmt stmt = (AbstractDefinitionStmt) unit;
+            if (stmt.getRightOp() instanceof ParameterRef) {
+                return stmt.getLeftOp();
+            }
+        }
+        return null;
     }
 
-
-    private void analyze(BaseCFGPath cfgPath) {
+    private boolean analyze(BaseCFGPath cfgPath) {
         Set<Value> localValuables = new HashSet<>();
         List<Unit> path = cfgPath.getPath();
-        if (path.isEmpty()) return;
-        localValuables.add(getFirstVariable((InvokeStmt) path.get(0)));
+        if (path.isEmpty()) return false;
+        localValuables.add(getFirstVariable(path.get(0)));
         for (int i = 1; i < path.size(); i++) {
             Unit nextUnit = path.get(i);
             if (ResourceUtil.isRelease(nextUnit)) {
-                return;
+                return false;
+            } else if (InterProcedureUtil.isInterProcedureCall(nextUnit, localValuables)) {
+                if (!InterProcedureUtil.dealInterProcedureCall(nextUnit, localValuables)) {
+                    return false;
+                }
             }
             Value localValueThisUnit = getLocalValueFromDefinitions(nextUnit);
             if (localValueThisUnit != null) {
@@ -72,6 +95,7 @@ public class PathAnalyzer {
             }
         }
         PathAnalyzer.reportStackUnitInfo(path);
+        return true;
     }
 
     private Value getLocalValueFromDefinitions(Unit nextUnit) {
@@ -93,6 +117,10 @@ public class PathAnalyzer {
             res.append(ele).append(" -> ");
         });
         res.append("END");
-        logger.info(String.format("Resource leak path: %s", res));
+//        logger.info(String.format("Resource leak path: %s", res));
+    }
+
+    private static void interProcedureDealer() {
+
     }
 }

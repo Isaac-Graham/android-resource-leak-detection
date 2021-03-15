@@ -1,6 +1,6 @@
 package cn.edu.sustech.cse.sqlab.leakdroid.util;
 
-import cn.edu.sustech.cse.sqlab.leakdroid.tranformers.ICFGContext;
+import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.ICFGContext;
 import soot.SootClass;
 import soot.Unit;
 import soot.jimple.InvokeStmt;

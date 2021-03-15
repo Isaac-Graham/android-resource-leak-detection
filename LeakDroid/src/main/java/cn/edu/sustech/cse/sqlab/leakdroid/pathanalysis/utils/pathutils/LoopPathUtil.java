@@ -1,6 +1,8 @@
 package cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.utils.pathutils;
 
 import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.entities.cfgpath.LoopOnceCFGPath;
+import soot.Body;
+import soot.SootMethod;
 import soot.Unit;
 import soot.jimple.toolkits.annotation.logic.Loop;
 
@@ -17,13 +19,14 @@ public class LoopPathUtil extends BasePathUtil implements Cloneable {
     private LoopExitPathUtil loopExitPathUtil;
 
 
-    public LoopPathUtil() {
-        super();
+    public LoopPathUtil(SootMethod sootMethod) {
+        super(sootMethod);
     }
 
-    public LoopPathUtil(Unit unit, Loop currentLoop) {
-        loopOncePathUtil = new LoopOncePathUtil(unit, currentLoop);
-        loopExitPathUtil = new LoopExitPathUtil(unit, currentLoop);
+    public LoopPathUtil(Unit unit, Loop currentLoop,SootMethod sootMethod) {
+        this(sootMethod);
+        loopOncePathUtil = new LoopOncePathUtil(unit, currentLoop, sootMethod);
+        loopExitPathUtil = new LoopExitPathUtil(unit, currentLoop, sootMethod);
     }
 
     public List<BasePathUtil> runPath() {

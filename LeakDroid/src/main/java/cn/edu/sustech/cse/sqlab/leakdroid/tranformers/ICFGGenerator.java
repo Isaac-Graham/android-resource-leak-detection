@@ -1,12 +1,12 @@
-package cn.edu.sustech.cse.sqlab.leakdroid.tranformers.interprocedural;
+package cn.edu.sustech.cse.sqlab.leakdroid.tranformers;
 
 import cn.edu.sustech.cse.sqlab.leakdroid.annotation.PhaseName;
-import cn.edu.sustech.cse.sqlab.leakdroid.tranformers.ICFGContext;
+import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.ICFGContext;
 import org.apache.log4j.Logger;
-import soot.SceneTransformer;
-import soot.jimple.toolkits.ide.icfg.JimpleBasedInterproceduralCFG;
+import soot.*;
+import soot.util.queue.QueueReader;
 
-import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 /**
@@ -21,8 +21,14 @@ public class ICFGGenerator extends SceneTransformer {
 
     @Override
     protected void internalTransform(String s, Map<String, String> map) {
-        ICFGContext.icfg = new JimpleBasedInterproceduralCFG();
-        ICFGContext.cfgGraphs = new HashMap<>();
-        ICFGContext.bodyLoops = new HashMap<>();
+        ICFGContext.initializeUnitBodyMap(Scene.v().getApplicationClasses());
+//        ICFGContext.initializeUnitToOwner();
+//        Scene.v().
+//
+//        logger.info(ICFGContext.unitToOwner.size());
     }
+
+
+
+
 }
