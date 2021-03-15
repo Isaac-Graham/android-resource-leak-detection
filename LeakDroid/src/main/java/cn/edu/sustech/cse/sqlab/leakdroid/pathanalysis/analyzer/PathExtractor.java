@@ -17,8 +17,8 @@ import java.util.List;
  */
 public class PathExtractor {
 
-    public static List<BaseCFGPath> extractPath(Unit unit, SootMethod sootMethod) {
-        List<BasePathUtil> paths = new PathUtil(unit, sootMethod).runPath();
+    public static List<BaseCFGPath> extractPath(Unit unit) {
+        List<BasePathUtil> paths = new PathUtil(unit).runPath();
         List<BaseCFGPath> res = new ArrayList<>();
         paths.forEach(path -> {
             res.add(path.getCFGPath());

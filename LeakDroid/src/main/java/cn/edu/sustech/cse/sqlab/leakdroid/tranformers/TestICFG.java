@@ -33,33 +33,9 @@ public class TestICFG extends BodyTransformer {
 
     @Override
     protected void internalTransform(Body body, String s, Map<String, String> map) {
-//        Scene.v().getApplicationClasses().forEach(sootClass -> {
-//            sootClass.getMethods().forEach(method -> {
-//                logger.info(method.getName());
-//            });
-//        });
-        if (!SootMethodUtil.getFullName(body.getMethod()).contains("cn.edu.sustech.cse.sqlab.testSoot.MainActivity.testClose")
-                && !SootMethodUtil.getFullName(body.getMethod()).contains("cn.edu.sustech.cse.sqlab.testSoot.MainActivity.close"))
-            return;
         if (body.getMethod().toString().contains(SootMethod.staticInitializerName)) return;
-        SootMethod method = Scene.v().getMethod("<cn.edu.sustech.cse.sqlab.testSoot.MainActivity: void close(java.io.Closeable)>");
-
-        logger.info(SootMethodUtil.getFullName(body.getMethod()));
-        logger.info(String.format("method: %d", System.identityHashCode(body.getMethod())));
-        logger.info(String.format("body: %d", System.identityHashCode(body.getMethod().getActiveBody())));
-        logger.info(String.format("body: %d", System.identityHashCode(body)));
-        logger.info(String.format("unit: %d", System.identityHashCode(body.getUnits().getFirst())));
-        logger.info(String.format("icfg.getMethod(): %d", System.identityHashCode(ICFGContext.icfg.getMethodOf(body.getUnits().getFirst()))));
-        logger.info(String.format("icfg.getBody(): %d", System.identityHashCode(ICFGContext.icfg.getBodyOf(body.getUnits().getFirst()))));
-        logger.info(SootMethodUtil.getFullName(method));
-        logger.info(String.format("close method: %d", System.identityHashCode(method)));
-        logger.info(String.format("close body: %d", System.identityHashCode(method.getActiveBody())));
-        logger.info(String.format("close body: %d", System.identityHashCode(body)));
-        logger.info(String.format("close unit: %d", System.identityHashCode(body.getUnits().getFirst())));
-        logger.info(String.format("close icfg.getMethod(): %d", System.identityHashCode(ICFGContext.icfg.getMethodOf(body.getUnits().getFirst()))));
-        logger.info(String.format("close icfg.getBody(): %d", System.identityHashCode(ICFGContext.icfg.getBodyOf(body.getUnits().getFirst()))));
-//        SootMethodUtil.ensureSSA(body.getMethod());
-//        SootMethodUtil.updateLocalName(body.getMethod());
+        SootMethodUtil.ensureSSA(body.getMethod());
+        SootMethodUtil.updateLocalName(body.getMethod());
 
 
 //        ICFGContext.addCFGFromBody(body);
@@ -89,10 +65,8 @@ public class TestICFG extends BodyTransformer {
 //        });
 
 
-        body.getUnits().stream().filter(ResourceUtil::isRequest).forEach(unit -> {
-            ResourceLeakDetector.detect(body.getMethod(), unit);
-        });
-        ResourceLeakDetector.detect(body.getMethod(), body.getUnits().getFirst());
+        body.getUnits().stream().filter(ResourceUtil::isRequest).forEach(ResourceLeakDetector::detect);
+//        ResourceLeakDetector.detect(body.getUnits().getFirst());
 
 //
 //        Scene.v().getCallGraph().forEach(logger::info);

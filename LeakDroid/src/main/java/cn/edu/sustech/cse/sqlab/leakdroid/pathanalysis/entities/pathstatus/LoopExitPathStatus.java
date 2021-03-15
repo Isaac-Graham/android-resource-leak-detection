@@ -2,8 +2,6 @@ package cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.entities.pathstatus;
 
 import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.ICFGContext;
 import org.apache.log4j.Logger;
-import soot.Body;
-import soot.SootMethod;
 import soot.Unit;
 import soot.jimple.toolkits.annotation.logic.Loop;
 import soot.toolkits.graph.ExceptionalUnitGraph;
@@ -19,8 +17,7 @@ public class LoopExitPathStatus extends BasePathStatus implements Cloneable {
     private static final Logger logger = Logger.getLogger(LoopExitPathStatus.class);
     private Loop currentLoop;
 
-    public LoopExitPathStatus(Loop currentLoop, SootMethod sootMethod) {
-        super(sootMethod);
+    public LoopExitPathStatus(Loop currentLoop) {
         this.currentLoop = currentLoop;
     }
 
@@ -38,7 +35,7 @@ public class LoopExitPathStatus extends BasePathStatus implements Cloneable {
         } else if (currentLoop.getBackJumpStmt() == unit) {
             this.neighborStack.push(new Stack<>());
         } else {
-            ExceptionalUnitGraph cfg = ICFGContext.getCFGFromMethod(sootMethod);
+            ExceptionalUnitGraph cfg = ICFGContext.getCFGFromUnit(unit);
             for (Unit successor : cfg.getSuccsOf(unit)) {
                 if (currentLoop.getLoopStatements().contains(successor)) {
                     successors.push(successor);

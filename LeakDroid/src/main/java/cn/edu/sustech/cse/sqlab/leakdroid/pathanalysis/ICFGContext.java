@@ -81,21 +81,8 @@ public class ICFGContext {
             sootClass.getMethods().forEach(sootMethod -> {
                 SootMethodUtil.ensureSSA(sootMethod);
                 SootMethodUtil.updateLocalName(sootMethod);
-                logger.info(SootMethodUtil.getFullName(sootMethod));
                 Body body = sootMethod.getActiveBody();
                 body.getUnits().forEach(unit -> {
-//                    if (unit.toString().contains("cn.edu.sustech.cse.sqlab.testSoot.MainActivity.close.l0 := @parameter0: java.io.Closeable")) {
-//                        logger.info(String.format("method: %d", System.identityHashCode(sootMethod)));
-//                        logger.info(String.format("body: %d", System.identityHashCode(body)));
-//                        logger.info(String.format("unit: %d", System.identityHashCode(body.getUnits().getFirst())));
-//                        logger.info(String.format("startUnit: %d", System.identityHashCode(unit)));
-//                    }
-//                    if (SootMethodUtil.getFullName(sootMethod).equals("cn.edu.sustech.cse.sqlab.testSoot.MainActivity.close")) {
-//                        logger.info(unit.toString());
-//                    }
-//                    if(unit.toString().contains("cn.edu.sustech.cse.sqlab.testSoot.MainActivity.close.l0 := @parameter0: java.io.Closeable")) {
-//                        logger.info("hrlloworld");
-//                    }
                     unitBodyMap.put(unit.toString(), sootMethod);
                 });
             });

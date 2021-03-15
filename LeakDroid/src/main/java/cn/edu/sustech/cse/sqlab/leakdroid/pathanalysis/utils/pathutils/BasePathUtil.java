@@ -3,8 +3,6 @@ package cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.utils.pathutils;
 import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.entities.cfgpath.BaseCFGPath;
 import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.entities.pathstatus.BasePathStatus;
 import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.utils.LoopUtil;
-import soot.Body;
-import soot.SootMethod;
 import soot.Unit;
 
 import java.util.ArrayList;
@@ -19,11 +17,6 @@ import java.util.Stack;
 public abstract class BasePathUtil implements Cloneable {
     protected BasePathStatus pathStatus;
     protected BaseCFGPath cfgPath;
-    protected SootMethod sootMethod;
-
-    public BasePathUtil(SootMethod sootMethod) {
-        this.sootMethod = sootMethod;
-    }
 
     @Override
     public Object clone() {
@@ -49,7 +42,7 @@ public abstract class BasePathUtil implements Cloneable {
                 callBack();
             } else {
                 Unit nextUnit = neighborStackTop.pop();
-                if (LoopUtil.isLoopHead(nextUnit, sootMethod)) {
+                if (LoopUtil.isLoopHead(nextUnit)) {
                     dealLoop(nextUnit, basePathUtils);
                 } else {
                     this.updatePath(nextUnit);

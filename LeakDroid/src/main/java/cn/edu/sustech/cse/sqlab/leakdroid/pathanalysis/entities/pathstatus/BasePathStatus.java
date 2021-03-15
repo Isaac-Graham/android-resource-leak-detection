@@ -1,8 +1,5 @@
 package cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.entities.pathstatus;
 
-import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.entities.cfgpath.BaseCFGPath;
-import soot.Body;
-import soot.SootMethod;
 import soot.Unit;
 
 import java.util.ArrayList;
@@ -17,16 +14,10 @@ import java.util.Stack;
 public abstract class BasePathStatus implements Cloneable {
     public Stack<Unit> pathStack;
     public Stack<Stack<Unit>> neighborStack;
-    protected SootMethod sootMethod;
 
     public BasePathStatus() {
         this.pathStack = new Stack<>();
         this.neighborStack = new Stack<>();
-    }
-
-    public BasePathStatus( SootMethod sootMethod) {
-        this();
-        this.sootMethod = sootMethod;
     }
 
     @Override

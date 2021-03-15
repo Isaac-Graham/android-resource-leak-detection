@@ -1,8 +1,6 @@
 package cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.entities.pathstatus;
 
 import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.ICFGContext;
-import soot.Body;
-import soot.SootMethod;
 import soot.Unit;
 import soot.jimple.toolkits.annotation.logic.Loop;
 import soot.toolkits.graph.ExceptionalUnitGraph;
@@ -17,8 +15,7 @@ import java.util.Stack;
 public class LoopOncePathStatus extends BasePathStatus implements Cloneable {
     private Loop currentLoop;
 
-    public LoopOncePathStatus(Loop currentLoop, SootMethod sootMethod) {
-        super(sootMethod);
+    public LoopOncePathStatus(Loop currentLoop) {
         this.currentLoop = currentLoop;
     }
 
@@ -36,7 +33,7 @@ public class LoopOncePathStatus extends BasePathStatus implements Cloneable {
             this.neighborStack.push(new Stack<>());
         } else {
             Stack<Unit> successors = new Stack<>();
-            ExceptionalUnitGraph cfg = ICFGContext.getCFGFromMethod(sootMethod);
+            ExceptionalUnitGraph cfg = ICFGContext.getCFGFromUnit(unit);
             cfg.getSuccsOf(unit).forEach(successor -> {
                 if (currentLoop.getLoopStatements().contains(successor)) {
                     successors.push(successor);

@@ -1,6 +1,5 @@
 package cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.utils;
 
-import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.ICFGContext;
 import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.ResourceLeakDetector;
 import org.apache.log4j.Logger;
 import soot.*;
@@ -46,15 +45,7 @@ public class InterProcedureUtil {
         SootMethod invokeMethod = invokeStmt.getInvokeExpr().getMethod();
         Body body = invokeMethod.getActiveBody();
         Unit startUnit = getStartUnit(body, argIndex);
-        if (body.getUnits().getFirst().toString().contains("cn.edu.sustech.cse.sqlab.testSoot.MainActivity.close.l0 := @parameter0: java.io.Closeable")) {
-            logger.info(String.format("invokeMethod: %d", System.identityHashCode(invokeMethod)));
-            logger.info(String.format("body: %d", System.identityHashCode(Scene.v().getMethod(invokeStmt.getInvokeExpr().getMethod().getSignature()).getActiveBody())));
-            logger.info(String.format("body: %d", System.identityHashCode(body)));
-            logger.info(String.format("unit: %d", System.identityHashCode(body.getUnits().getFirst())));
-            logger.info(String.format("startUnit: %d", System.identityHashCode(startUnit)));
-            logger.info(String.format("icfg.getMethod(): %d", System.identityHashCode(ICFGContext.icfg.getMethodOf(startUnit))));
-        }
-        return ResourceLeakDetector.detect(invokeMethod, startUnit);
+        return ResourceLeakDetector.detect(startUnit);
     }
 
     public static Unit getStartUnit(Body body, int argIndex) {

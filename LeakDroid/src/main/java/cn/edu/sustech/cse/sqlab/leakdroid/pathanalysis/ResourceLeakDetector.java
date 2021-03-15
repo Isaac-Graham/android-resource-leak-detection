@@ -15,8 +15,8 @@ import java.util.List;
  * @date 2021/3/12 15:50
  */
 public class ResourceLeakDetector {
-    public static boolean detect(SootMethod sootMethod, Unit unit) {
-        List<BaseCFGPath> paths = PathExtractor.extractPath(unit, sootMethod);
-        return new PathAnalyzer(sootMethod, paths).analyze();
+    public static boolean detect(Unit unit) {
+        List<BaseCFGPath> paths = PathExtractor.extractPath(unit);
+        return new PathAnalyzer(paths, unit).analyze();
     }
 }

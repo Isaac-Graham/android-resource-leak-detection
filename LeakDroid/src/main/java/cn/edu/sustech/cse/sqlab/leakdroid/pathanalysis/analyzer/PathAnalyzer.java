@@ -30,13 +30,11 @@ public class PathAnalyzer {
     private static final Logger logger = Logger.getLogger(PathAnalyzer.class);
     private final HashMap<Value, List<Unit>> localDefHashMap;
     private final List<BaseCFGPath> paths;
-    private final SootMethod sootMethod;
 
-    public PathAnalyzer(SootMethod sootMethod, List<BaseCFGPath> paths) {
-        this.sootMethod = sootMethod;
+    public PathAnalyzer(List<BaseCFGPath> paths, Unit startUnit) {
         this.localDefHashMap = new HashMap<>();
         this.paths = paths;
-        initialLocalDefHashMap();
+        initialLocalDefHashMap(startUnit);
     }
 
     public boolean analyze() {
@@ -49,7 +47,8 @@ public class PathAnalyzer {
         return res;
     }
 
-    private void initialLocalDefHashMap() {
+    private void initialLocalDefHashMap(Unit startUnit) {
+        SootMethod sootMethod = ICFGContext.getMethodFromUnit(startUnit);
         ExceptionalUnitGraph cfg = ICFGContext.getCFGFromMethod(sootMethod);
         SimpleLocalDefs sld = new SimpleLocalDefs(cfg);
         sootMethod.getActiveBody().getLocals().forEach(local -> {
@@ -63,7 +62,6 @@ public class PathAnalyzer {
     private static Value getFirstVariable(Unit unit) {
         if (unit instanceof InvokeStmt) {
             InvokeStmt invokeStmt = (InvokeStmt) unit;
-            logger.info(invokeStmt.getInvokeExpr().getClass());
             AbstractSpecialInvokeExpr abstractStartSpecialInvokeExpr = (AbstractSpecialInvokeExpr) invokeStmt.getInvokeExpr();
             return abstractStartSpecialInvokeExpr.getBase();
         } else if (unit instanceof AbstractDefinitionStmt) {
