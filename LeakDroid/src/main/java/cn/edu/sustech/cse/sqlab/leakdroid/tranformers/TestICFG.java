@@ -9,13 +9,11 @@ import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.entities.cfgpath.BaseCFGP
 import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.utils.InterProcedureUtil;
 import cn.edu.sustech.cse.sqlab.leakdroid.util.ResourceUtil;
 import cn.edu.sustech.cse.sqlab.leakdroid.util.SootMethodUtil;
+import cn.edu.sustech.cse.sqlab.leakdroid.util.UnitUtil;
 import org.apache.log4j.Logger;
 import soot.*;
-import soot.jimple.InvokeStmt;
-import soot.jimple.Jimple;
-import soot.jimple.ParameterRef;
-import soot.jimple.internal.AbstractDefinitionStmt;
-import soot.jimple.internal.JIdentityStmt;
+import soot.jimple.*;
+import soot.jimple.internal.*;
 import soot.jimple.toolkits.annotation.logic.LoopFinder;
 import soot.toolkits.graph.ExceptionalUnitGraph;
 
@@ -33,11 +31,13 @@ public class TestICFG extends BodyTransformer {
 
     @Override
     protected void internalTransform(Body body, String s, Map<String, String> map) {
-        if (!body.getMethod().getName().contains("recursiveTest")) return;
+        if (!SootMethodUtil.getFullName(body.getMethod()).contains("loopTest"))
+            return;
         if (body.getMethod().toString().contains(SootMethod.staticInitializerName)) return;
 
         body.getUnits().stream().filter(ResourceUtil::isRequest).forEach(unit -> {
             new ResourceLeakDetector(unit).detect();
         });
+
     }
 }

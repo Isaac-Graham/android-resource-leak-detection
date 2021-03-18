@@ -1,8 +1,10 @@
 package cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.entities.pathstatus;
 
 import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.ICFGContext;
+import cn.edu.sustech.cse.sqlab.leakdroid.util.UnitUtil;
 import org.apache.log4j.Logger;
 import soot.Unit;
+import soot.jimple.InvokeStmt;
 import soot.toolkits.graph.ExceptionalUnitGraph;
 
 import java.util.Stack;
@@ -26,7 +28,10 @@ public class PathStatus extends BasePathStatus implements Cloneable {
         Stack<Unit> successors = new Stack<>();
         if (unit != null) {
             ExceptionalUnitGraph cfg = ICFGContext.getCFGFromUnit(unit);
-            cfg.getSuccsOf(unit).forEach(successors::push);
+            cfg.getSuccsOf(unit).forEach(successor -> {
+                if (!(unit instanceof InvokeStmt) && UnitUtil.isCaughtExceptionRef(successor)) return;
+                successors.push(successor);
+            });
         }
         this.neighborStack.push(successors);
     }

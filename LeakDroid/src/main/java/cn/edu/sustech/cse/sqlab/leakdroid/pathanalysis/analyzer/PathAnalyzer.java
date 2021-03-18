@@ -10,11 +10,10 @@ import org.apache.log4j.Logger;
 import soot.SootMethod;
 import soot.Unit;
 import soot.Value;
-import soot.jimple.DefinitionStmt;
-import soot.jimple.InvokeStmt;
-import soot.jimple.ParameterRef;
+import soot.jimple.*;
 import soot.jimple.internal.AbstractDefinitionStmt;
 import soot.jimple.internal.AbstractSpecialInvokeExpr;
+import soot.jimple.internal.JStaticInvokeExpr;
 import soot.toolkits.graph.ExceptionalUnitGraph;
 import soot.toolkits.scalar.SimpleLocalDefs;
 
@@ -91,15 +90,23 @@ public class PathAnalyzer {
         localValuables.add(getFirstVariable(path.get(0)));
         for (int i = 1; i < path.size(); i++) {
             Unit nextUnit = path.get(i);
-            if (ResourceUtil.isRelease(nextUnit)) {
+            if (ResourceUtil.isRelease(nextUnit, localValuables)) {
                 return false;
+            } else if (nextUnit instanceof IfStmt) {
+                if (i == path.size() - 1) {
+                    logger.warn(String.format("IfStmt occurs in the last of a path: %s", path));
+                    return true;
+                }
+                if (!branchReachable(localValuables, (IfStmt) nextUnit, path.get(i + 1))) {
+                    return false;
+                }
             } else if (InterProcedureUtil.isInterProcedureCall(nextUnit, localValuables)) {
                 if (meetMethods.contains(InterProcedureUtil.getInvokeMethod(nextUnit))) return true;
                 if (!InterProcedureUtil.dealInterProcedureCall(nextUnit, localValuables, new HashSet<>(meetMethods))) {
                     return false;
                 }
             }
-            Value localValueThisUnit = getLocalValueFromDefinitions(nextUnit);
+            Value localValueThisUnit = getLocalValueFromDefinitions(nextUnit, localValuables);
             if (localValueThisUnit != null) {
                 localValuables.add(localValueThisUnit);
             }
@@ -107,12 +114,15 @@ public class PathAnalyzer {
         return true;
     }
 
-    private Value getLocalValueFromDefinitions(Unit nextUnit) {
+    private Value getLocalValueFromDefinitions(Unit nextUnit, Set<Value> localValuables) {
         Set<Map.Entry<Value, List<Unit>>> entrySet = this.localDefHashMap.entrySet();
         for (Map.Entry<Value, List<Unit>> valueListEntry : entrySet) {
             for (Unit def : valueListEntry.getValue()) {
                 if (def == nextUnit) {
-                    return ((DefinitionStmt) def).getLeftOp();
+                    Value rightOp = ((DefinitionStmt) def).getRightOp();
+                    if (localValuables.contains(rightOp)) {
+                        return ((DefinitionStmt) def).getLeftOp();
+                    }
                 }
             }
         }
@@ -122,11 +132,61 @@ public class PathAnalyzer {
     private static void reportStackUnitInfo(BaseCFGPath cfgPath) {
         List<Unit> path = cfgPath.getPath();
         StringBuilder res = new StringBuilder();
-        path.forEach(ele -> {
-            ele.addTag(new ResourceLeakTag());
-            res.append(ele).append(" -> ");
-        });
+        for (int i = 0; i < path.size(); i++) {
+            Unit leakUnit = path.get(i);
+            if (!leakUnit.hasTag(ResourceLeakTag.name)) {
+                leakUnit.addTag(new ResourceLeakTag());
+            }
+            if (i != path.size() - 1) {
+                UnitUtil.getResourceLeakTag(leakUnit).addSuccessor(path.get(i + 1));
+            }
+            res.append(leakUnit).append(" -> ");
+        }
         res.append("END");
         logger.info(String.format("Resource leak path: %s", res));
+    }
+
+    private static boolean branchReachable(Set<Value> localValuables, IfStmt ifStmt, Unit nextUnit) {
+        final String equal = "==";
+        final String noEqual = "!=";
+        ConditionExpr conditionExpr = (ConditionExpr) ifStmt.getCondition();
+
+        Value op1 = conditionExpr.getOp1();
+        String symbol = conditionExpr.getSymbol();
+        Value op2 = conditionExpr.getOp2();
+        if (!localValuables.contains(op1) && !localValuables.contains(op2)) {
+            return true;
+        }
+
+        if (nextUnit == ifStmt.getTarget()) {
+            if (localValuables.contains(op1) && localValuables.contains(op2)) {
+                if (symbol.equals(equal)) {
+                    return true;
+                }
+                logger.warn(String.format("Unknown condition: %s", conditionExpr));
+            } else {
+                Value noLocal = localValuables.contains(op1) ? op2 : op1;
+                // != null
+                if (symbol.equals(noEqual) && noLocal.equals(NullConstant.v())) {
+                    return true;
+                }
+                logger.warn(String.format("Unknown condition: %s", conditionExpr));
+            }
+        } else {
+            if (localValuables.contains(op1) && localValuables.contains(op2)) {
+                if (symbol.equals(noEqual)) {
+                    return true;
+                }
+                logger.warn(String.format("Unknown condition: %s", conditionExpr));
+            } else {
+                Value noLocal = localValuables.contains(op1) ? op2 : op1;
+                // != null
+                if (!symbol.equals(noEqual) && noLocal.equals(NullConstant.v())) {
+                    return true;
+                }
+                logger.warn(String.format("Unknown condition: %s", conditionExpr));
+            }
+        }
+        return false;
     }
 }

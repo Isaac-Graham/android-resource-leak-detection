@@ -3,6 +3,7 @@ package cn.edu.sustech.cse.sqlab.leakdroid.tranformers;
 import cn.edu.sustech.cse.sqlab.leakdroid.annotation.PhaseName;
 import cn.edu.sustech.cse.sqlab.leakdroid.cmdparser.OptionsArgs;
 import cn.edu.sustech.cse.sqlab.leakdroid.tags.ResourceLeakTag;
+import cn.edu.sustech.cse.sqlab.leakdroid.util.UnitUtil;
 import org.apache.log4j.Logger;
 import soot.*;
 import soot.toolkits.graph.ExceptionalUnitGraph;
@@ -48,7 +49,7 @@ public class CFGDrawer extends BodyTransformer {
             }
             List<Unit> successors = cfg.getSuccsOf(unit);
             successors.forEach(successor -> {
-                if (unit.hasTag(ResourceLeakTag.name) && successor.hasTag(ResourceLeakTag.name)) {
+                if (unit.hasTag(ResourceLeakTag.name) && UnitUtil.getResourceLeakTag(unit).getSuccessors().contains(successor)) {
                     dotGraph.drawEdge(getNodeName(unit), getNodeName(successor)).setAttribute("color", "red");
                 } else {
                     dotGraph.drawEdge(getNodeName(unit), getNodeName(successor)).setAttribute("color", "black");

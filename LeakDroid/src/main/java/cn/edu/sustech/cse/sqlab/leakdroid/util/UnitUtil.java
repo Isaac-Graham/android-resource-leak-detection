@@ -1,11 +1,13 @@
 package cn.edu.sustech.cse.sqlab.leakdroid.util;
 
+import cn.edu.sustech.cse.sqlab.leakdroid.tags.ResourceLeakTag;
 import cn.edu.sustech.cse.sqlab.leakdroid.tags.UnitMethodNameTag;
 import org.apache.log4j.Logger;
-import soot.Body;
-import soot.SootClass;
-import soot.SootMethod;
-import soot.Unit;
+import soot.*;
+import soot.jimple.CaughtExceptionRef;
+import soot.jimple.IdentityStmt;
+import soot.jimple.internal.AbstractDefinitionStmt;
+import soot.jimple.internal.JIdentityStmt;
 import soot.tagkit.Tag;
 import soot.util.Chain;
 
@@ -35,7 +37,7 @@ public class UnitUtil {
             sootClass.getMethods().forEach(sootMethod -> {
                 if (!sootMethod.hasActiveBody()) return;
                 SootMethodUtil.ensureSSA(sootMethod);
-                SootMethodUtil.updateLocalName(sootMethod);
+//                SootMethodUtil.updateLocalName(sootMethod);
                 Body body = sootMethod.getActiveBody();
                 body.getUnits().forEach(unit -> {
                     unit.addTag(new UnitMethodNameTag(sootMethod));
@@ -43,5 +45,22 @@ public class UnitUtil {
             });
         });
     }
+
+    public static ResourceLeakTag getResourceLeakTag(Unit unit) {
+        if (!unit.hasTag(ResourceLeakTag.name)) return null;
+        return (ResourceLeakTag) unit.getTag(ResourceLeakTag.name);
+    }
+
+    public static boolean isCaughtExceptionRef(Unit unit) {
+        if (unit instanceof JIdentityStmt) {
+            IdentityStmt stmt = (IdentityStmt) unit;
+            return stmt.getRightOp() instanceof CaughtExceptionRef;
+        }
+        return false;
+    }
+//
+//    public static Value getInvokeBase() {
+//
+//    }
 
 }

@@ -51,6 +51,7 @@ public class InterProcedureUtil {
         InvokeStmt invokeStmt = (InvokeStmt) unit;
         int argIndex = getInterProcedureParameterIndex(invokeStmt, localValuables);
         SootMethod invokeMethod = invokeStmt.getInvokeExpr().getMethod();
+        if (!invokeMethod.hasActiveBody()) return false;
         Body body = invokeMethod.getActiveBody();
         Unit startUnit = getStartUnit(body, argIndex);
         return new ResourceLeakDetector(startUnit, meetMethods).detect();
