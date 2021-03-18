@@ -5,8 +5,8 @@ import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.utils.InterProcedureUtil;
 import cn.edu.sustech.cse.sqlab.leakdroid.tags.ResourceLeakTag;
 import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.ICFGContext;
 import cn.edu.sustech.cse.sqlab.leakdroid.util.ResourceUtil;
+import cn.edu.sustech.cse.sqlab.leakdroid.util.UnitUtil;
 import org.apache.log4j.Logger;
-import soot.Body;
 import soot.SootMethod;
 import soot.Unit;
 import soot.Value;
@@ -15,7 +15,6 @@ import soot.jimple.InvokeStmt;
 import soot.jimple.ParameterRef;
 import soot.jimple.internal.AbstractDefinitionStmt;
 import soot.jimple.internal.AbstractSpecialInvokeExpr;
-import soot.jimple.internal.JSpecialInvokeExpr;
 import soot.toolkits.graph.ExceptionalUnitGraph;
 import soot.toolkits.scalar.SimpleLocalDefs;
 
@@ -30,17 +29,21 @@ public class PathAnalyzer {
     private static final Logger logger = Logger.getLogger(PathAnalyzer.class);
     private final HashMap<Value, List<Unit>> localDefHashMap;
     private final List<BaseCFGPath> paths;
+    private final Set<SootMethod> meetMethods;
 
-    public PathAnalyzer(List<BaseCFGPath> paths, Unit startUnit) {
+    public PathAnalyzer(List<BaseCFGPath> paths, Unit startUnit, Set<SootMethod> meetMethods) {
         this.localDefHashMap = new HashMap<>();
+        this.meetMethods = meetMethods;
         this.paths = paths;
         initialLocalDefHashMap(startUnit);
+        initialMeetMethod(startUnit);
     }
 
     public boolean analyze() {
         boolean res = false;
         for (BaseCFGPath path : paths) {
             if (this.analyze(path)) {
+                PathAnalyzer.reportStackUnitInfo(path);
                 res = true;
             }
         }
@@ -48,15 +51,23 @@ public class PathAnalyzer {
     }
 
     private void initialLocalDefHashMap(Unit startUnit) {
-        SootMethod sootMethod = ICFGContext.getMethodFromUnit(startUnit);
+        SootMethod sootMethod = UnitUtil.getSootMethod(startUnit);
         ExceptionalUnitGraph cfg = ICFGContext.getCFGFromMethod(sootMethod);
         SimpleLocalDefs sld = new SimpleLocalDefs(cfg);
+        if (sootMethod == null) {
+            return;
+        }
         sootMethod.getActiveBody().getLocals().forEach(local -> {
             if (sld.getDefsOf(local).stream().anyMatch(unit -> !(unit instanceof DefinitionStmt))) {
                 logger.error(String.format("Error occurs: All should be DefinitionStmt in def list: %s", sld.getDefsOf(local)));
             }
             this.localDefHashMap.put(local, sld.getDefsOf(local));
         });
+    }
+
+    private void initialMeetMethod(Unit unit) {
+        SootMethod sootMethod = UnitUtil.getSootMethod(unit);
+        this.meetMethods.add(sootMethod);
     }
 
     private static Value getFirstVariable(Unit unit) {
@@ -83,7 +94,8 @@ public class PathAnalyzer {
             if (ResourceUtil.isRelease(nextUnit)) {
                 return false;
             } else if (InterProcedureUtil.isInterProcedureCall(nextUnit, localValuables)) {
-                if (!InterProcedureUtil.dealInterProcedureCall(nextUnit, localValuables)) {
+                if (meetMethods.contains(InterProcedureUtil.getInvokeMethod(nextUnit))) return true;
+                if (!InterProcedureUtil.dealInterProcedureCall(nextUnit, localValuables, new HashSet<>(meetMethods))) {
                     return false;
                 }
             }
@@ -92,7 +104,6 @@ public class PathAnalyzer {
                 localValuables.add(localValueThisUnit);
             }
         }
-        PathAnalyzer.reportStackUnitInfo(path);
         return true;
     }
 
@@ -108,17 +119,14 @@ public class PathAnalyzer {
         return null;
     }
 
-    private static void reportStackUnitInfo(List<Unit> path) {
+    private static void reportStackUnitInfo(BaseCFGPath cfgPath) {
+        List<Unit> path = cfgPath.getPath();
         StringBuilder res = new StringBuilder();
         path.forEach(ele -> {
             ele.addTag(new ResourceLeakTag());
             res.append(ele).append(" -> ");
         });
         res.append("END");
-//        logger.info(String.format("Resource leak path: %s", res));
-    }
-
-    private static void interProcedureDealer() {
-
+        logger.info(String.format("Resource leak path: %s", res));
     }
 }

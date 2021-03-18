@@ -39,13 +39,21 @@ public class InterProcedureUtil {
         return -1;
     }
 
-    public static boolean dealInterProcedureCall(Unit unit, Set<Value> localValuables) {
+    public static SootMethod getInvokeMethod(Unit unit) {
+        if (!(unit instanceof InvokeStmt)) {
+            return null;
+        }
+        InvokeStmt invokeStmt = (InvokeStmt) unit;
+        return invokeStmt.getInvokeExpr().getMethod();
+    }
+
+    public static boolean dealInterProcedureCall(Unit unit, Set<Value> localValuables, Set<SootMethod> meetMethods) {
         InvokeStmt invokeStmt = (InvokeStmt) unit;
         int argIndex = getInterProcedureParameterIndex(invokeStmt, localValuables);
         SootMethod invokeMethod = invokeStmt.getInvokeExpr().getMethod();
         Body body = invokeMethod.getActiveBody();
         Unit startUnit = getStartUnit(body, argIndex);
-        return ResourceLeakDetector.detect(startUnit);
+        return new ResourceLeakDetector(startUnit, meetMethods).detect();
     }
 
     public static Unit getStartUnit(Body body, int argIndex) {

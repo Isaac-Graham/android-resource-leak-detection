@@ -33,47 +33,11 @@ public class TestICFG extends BodyTransformer {
 
     @Override
     protected void internalTransform(Body body, String s, Map<String, String> map) {
+        if (!body.getMethod().getName().contains("recursiveTest")) return;
         if (body.getMethod().toString().contains(SootMethod.staticInitializerName)) return;
-        SootMethodUtil.ensureSSA(body.getMethod());
-        SootMethodUtil.updateLocalName(body.getMethod());
 
-
-//        ICFGContext.addCFGFromBody(body);
-//        ICFGContext.addLoopFromBody(body);
-//        body.getUnits().forEach(unit -> {
-//            if (unit.toString().contains("cn.edu.sustech.cse.sqlab.testSoot.MainActivity.close.l0 := @parameter0: java.io.Closeable")) {
-//                logger.info(ICFGContext.icfg.getBodyOf(unit));
-//            }
-//        });
-
-//        body.getUnits().forEach(unit -> {
-//            if (unit instanceof JIdentityStmt) {
-//                AbstractDefinitionStmt stmt = (AbstractDefinitionStmt) unit;
-//                logger.info(unit);
-//                logger.info(stmt.getRightOp().getClass());
-//            }
-//        });
-
-
-//        body.getUnits().forEach(unit -> {
-//            if (unit instanceof InvokeStmt) {
-//                logger.info("###");
-//                logger.info(unit);
-//                InvokeStmt invokeStmt = (InvokeStmt) unit;
-//                logger.info(invokeStmt.getInvokeExpr().getArgs());
-//            }
-//        });
-
-
-        body.getUnits().stream().filter(ResourceUtil::isRequest).forEach(ResourceLeakDetector::detect);
-//        ResourceLeakDetector.detect(body.getUnits().getFirst());
-
-//
-//        Scene.v().getCallGraph().forEach(logger::info);
-
-//        Unit startUnit = InterProcedureUtil.getStartUnit(body, 0);
-//        PathExtractor.extractPath(startUnit);
-
-
+        body.getUnits().stream().filter(ResourceUtil::isRequest).forEach(unit -> {
+            new ResourceLeakDetector(unit).detect();
+        });
     }
 }

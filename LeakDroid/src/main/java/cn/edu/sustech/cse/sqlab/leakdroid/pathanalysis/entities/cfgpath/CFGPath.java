@@ -1,8 +1,8 @@
 package cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.entities.cfgpath;
 
 import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.ICFGContext;
-import soot.SootMethod;
-import soot.toolkits.graph.UnitGraph;
+import org.apache.log4j.Logger;
+import soot.toolkits.graph.ExceptionalUnitGraph;
 
 /**
  * @author Isaac Chen
@@ -10,6 +10,8 @@ import soot.toolkits.graph.UnitGraph;
  * @date 2021/3/12 15:21
  */
 public class CFGPath extends BaseCFGPath implements Cloneable {
+    private final static Logger logger = Logger.getLogger(CFGPath.class);
+
     public CFGPath() {
         super();
     }
@@ -21,7 +23,11 @@ public class CFGPath extends BaseCFGPath implements Cloneable {
 
     @Override
     public boolean isEnd() {
-        UnitGraph unitGraph = ICFGContext.getCFGFromUnit(this.getPathTail());
+        ExceptionalUnitGraph unitGraph = ICFGContext.getCFGFromUnit(this.getPathTail());
+        if (unitGraph == null) {
+            logger.warn("CFG is null");
+            return true;
+        }
         return unitGraph.getTails().contains(this.getPathTail());
     }
 }

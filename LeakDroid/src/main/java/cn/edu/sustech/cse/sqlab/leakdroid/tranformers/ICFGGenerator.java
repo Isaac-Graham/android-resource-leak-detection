@@ -1,12 +1,13 @@
 package cn.edu.sustech.cse.sqlab.leakdroid.tranformers;
 
 import cn.edu.sustech.cse.sqlab.leakdroid.annotation.PhaseName;
-import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.ICFGContext;
+import cn.edu.sustech.cse.sqlab.leakdroid.tags.UnitMethodNameTag;
+import cn.edu.sustech.cse.sqlab.leakdroid.util.SootMethodUtil;
+import cn.edu.sustech.cse.sqlab.leakdroid.util.UnitUtil;
 import org.apache.log4j.Logger;
 import soot.*;
-import soot.util.queue.QueueReader;
+import soot.util.Chain;
 
-import java.util.Iterator;
 import java.util.Map;
 
 /**
@@ -21,14 +22,6 @@ public class ICFGGenerator extends SceneTransformer {
 
     @Override
     protected void internalTransform(String s, Map<String, String> map) {
-        ICFGContext.initializeUnitBodyMap(Scene.v().getApplicationClasses());
-//        ICFGContext.initializeUnitToOwner();
-//        Scene.v().
-//
-//        logger.info(ICFGContext.unitToOwner.size());
+        UnitUtil.addMethodTag(Scene.v().getClasses());
     }
-
-
-
-
 }

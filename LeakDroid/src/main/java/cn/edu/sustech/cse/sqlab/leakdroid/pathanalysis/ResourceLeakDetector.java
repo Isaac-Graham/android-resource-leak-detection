@@ -7,7 +7,9 @@ import soot.Body;
 import soot.SootMethod;
 import soot.Unit;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Isaac Chen
@@ -15,8 +17,21 @@ import java.util.List;
  * @date 2021/3/12 15:50
  */
 public class ResourceLeakDetector {
-    public static boolean detect(Unit unit) {
+    public final Unit unit;
+    public final Set<SootMethod> meetMethods;
+
+    public ResourceLeakDetector(Unit unit) {
+        this.unit = unit;
+        this.meetMethods = new HashSet<>();
+    }
+
+    public ResourceLeakDetector(Unit unit, Set<SootMethod> meetMethods) {
+        this.unit = unit;
+        this.meetMethods = meetMethods;
+    }
+
+    public boolean detect() {
         List<BaseCFGPath> paths = PathExtractor.extractPath(unit);
-        return new PathAnalyzer(paths, unit).analyze();
+        return new PathAnalyzer(paths, unit, meetMethods).analyze();
     }
 }

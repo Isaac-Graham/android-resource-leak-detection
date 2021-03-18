@@ -6,7 +6,6 @@ import soot.shimple.Shimple;
 import soot.shimple.ShimpleBody;
 
 import java.util.Arrays;
-import java.util.List;
 
 /**
  * @author Isaac Chen
@@ -37,14 +36,14 @@ public class SootMethodUtil {
     }
 
     public static void ensureSSA(SootMethod sootMethod) {
-        // TODO: require(this.isConcrete)
+        if (!sootMethod.isConcrete()) return;
         if (!(sootMethod.retrieveActiveBody() instanceof ShimpleBody)) {
             sootMethod.setActiveBody(Shimple.v().newBody(sootMethod.retrieveActiveBody()));
         }
     }
 
     public static void updateLocalName(SootMethod sootMethod) {
-        // TODO: require(this.isConcrete)
+        if (!sootMethod.isConcrete()) return;
         if (sootMethod.retrieveActiveBody()
                 .getLocals()
                 .stream()

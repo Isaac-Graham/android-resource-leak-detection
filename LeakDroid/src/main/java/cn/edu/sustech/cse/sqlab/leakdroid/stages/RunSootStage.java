@@ -69,7 +69,7 @@ public class RunSootStage extends BaseStage {
     }
 
     private void addTransformers() {
-        PackManagerUtil.addTransformation(PackManager.v(), new UnloadableBodiesEliminator());
+//        PackManagerUtil.addTransformation(PackManager.v(), new UnloadableBodiesEliminator());
         PackManagerUtil.addTransformation(PackManager.v(), new ICFGGenerator());
 //        PackManagerUtil.addTransformation(PackManager.v(), new ICFGGenerator());
         PackManagerUtil.addTransformation(PackManager.v(), new TestICFG());
