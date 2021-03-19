@@ -15,6 +15,8 @@ import soot.*;
 import soot.jimple.*;
 import soot.jimple.internal.*;
 import soot.jimple.toolkits.annotation.logic.LoopFinder;
+import soot.shimple.PhiExpr;
+import soot.shimple.internal.SPhiExpr;
 import soot.toolkits.graph.ExceptionalUnitGraph;
 
 import java.util.*;
@@ -31,13 +33,28 @@ public class TestICFG extends BodyTransformer {
 
     @Override
     protected void internalTransform(Body body, String s, Map<String, String> map) {
-        if (!SootMethodUtil.getFullName(body.getMethod()).contains("loopTest"))
-            return;
+//        if (!SootMethodUtil.getFullName(body.getMethod()).contains("foo"))
+//            return;
         if (body.getMethod().toString().contains(SootMethod.staticInitializerName)) return;
 
         body.getUnits().stream().filter(ResourceUtil::isRequest).forEach(unit -> {
             new ResourceLeakDetector(unit).detect();
         });
-
+//        Unit startUnit = body.getUnits().getFirst();
+//
+//        body.getUnits().forEach(unit -> {
+//            if (unit instanceof DefinitionStmt) {
+//                Value rightOp = UnitUtil.getDefineOp(unit, UnitUtil.rightOp);
+//                if (rightOp instanceof PhiExpr) {
+//                    logger.debug("###");
+//                    logger.debug(rightOp);
+//                    PhiExpr phiExpr = (PhiExpr) rightOp;
+//                    logger.debug(phiExpr.getArgs());
+////                    phiExpr.getArgs().forEach(arg -> {
+////                        logger.info(arg.getUnit());
+////                    });
+//                }
+//            }
+//        });
     }
 }

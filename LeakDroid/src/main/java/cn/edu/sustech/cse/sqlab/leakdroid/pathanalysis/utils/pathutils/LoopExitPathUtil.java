@@ -1,7 +1,7 @@
 package cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.utils.pathutils;
 
 import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.entities.cfgpath.LoopExitCFGPath;
-import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.entities.pathstatus.LoopExitPathStatus;
+import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.entities.pathstatus.LoopStatus;
 import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.utils.LoopUtil;
 import soot.Unit;
 import soot.jimple.Stmt;
@@ -21,7 +21,7 @@ public class LoopExitPathUtil extends BasePathUtil implements Cloneable {
 
     public LoopExitPathUtil(Loop currentLoop) {
         this.currentLoop = currentLoop;
-        super.pathStatus = new LoopExitPathStatus(currentLoop);
+        super.pathStatus = new LoopStatus(currentLoop);
         super.cfgPath = new LoopExitCFGPath(currentLoop);
     }
 

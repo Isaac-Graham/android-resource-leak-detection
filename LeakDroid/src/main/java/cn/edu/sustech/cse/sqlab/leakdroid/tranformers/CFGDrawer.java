@@ -2,11 +2,17 @@ package cn.edu.sustech.cse.sqlab.leakdroid.tranformers;
 
 import cn.edu.sustech.cse.sqlab.leakdroid.annotation.PhaseName;
 import cn.edu.sustech.cse.sqlab.leakdroid.cmdparser.OptionsArgs;
+import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.ICFGContext;
 import cn.edu.sustech.cse.sqlab.leakdroid.tags.ResourceLeakTag;
 import cn.edu.sustech.cse.sqlab.leakdroid.util.UnitUtil;
 import org.apache.log4j.Logger;
 import soot.*;
+import soot.jbco.util.SimpleExceptionalGraph;
+import soot.toolkits.graph.BriefUnitGraph;
+import soot.toolkits.graph.CompleteUnitGraph;
+import soot.toolkits.graph.ExceptionalBlockGraph;
 import soot.toolkits.graph.ExceptionalUnitGraph;
+import soot.toolkits.graph.pdg.EnhancedUnitGraph;
 import soot.util.cfgcmd.CFGToDotGraph;
 import soot.util.dot.DotGraph;
 
@@ -30,15 +36,15 @@ public class CFGDrawer extends BodyTransformer {
 
     @Override
     protected void internalTransform(Body body, String s, Map<String, String> map) {
-        if (true) {
-            return;
-        }
+//        if (true) {
+//            return;
+//        }
         DotGraph dotGraph = generateDotGraphPlanA(body);
         printDotGraph(body, dotGraph);
     }
 
     private static DotGraph generateDotGraphPlanA(Body body) {
-        ExceptionalUnitGraph cfg = new ExceptionalUnitGraph(body);
+        ExceptionalUnitGraph cfg = ICFGContext.getCFGFromMethod(body.getMethod());
         DotGraph dotGraph = new DotGraph(String.format("CFG of %s", body.getMethod()));
 
         body.getUnits().forEach(unit -> {
@@ -60,7 +66,7 @@ public class CFGDrawer extends BodyTransformer {
     }
 
     private static DotGraph generateDotGraphPlanB(Body body) {
-        ExceptionalUnitGraph cfg = new ExceptionalUnitGraph(body);
+        ExceptionalUnitGraph cfg = ICFGContext.getCFGFromMethod(body.getMethod());
         return new CFGToDotGraph().drawCFG(cfg);
     }
 
