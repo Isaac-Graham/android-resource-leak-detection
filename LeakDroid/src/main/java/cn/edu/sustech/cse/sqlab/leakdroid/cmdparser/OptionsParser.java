@@ -14,7 +14,7 @@ import java.io.PrintWriter;
 public class OptionsParser {
     private static final Logger logger = Logger.getLogger(OptionsParser.class);
     private static final Options options = new Options();
-    private static CommandLine commandLine;
+    public static CommandLine commandLine;
 
     public static void parse(String[] args) {
         initCliArgs(args);

@@ -1,4 +1,4 @@
-package cn.edu.sustech.cse.sqlab.leakdroid.stages;
+package cn.edu.sustech.cse.sqlab.leakdroid.pipeline.stages;
 
 import cn.edu.sustech.cse.sqlab.leakdroid.tranformers.*;
 import cn.edu.sustech.cse.sqlab.leakdroid.util.PackManagerUtil;
@@ -8,11 +8,11 @@ import cn.edu.sustech.cse.sqlab.leakdroid.cmdparser.OptionsArgs;
 import soot.PackManager;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Arrays;
 
 public class RunSootStage extends BaseStage {
     private final static Logger logger = Logger.getLogger(RunSootStage.class);
+    protected static final String stageName = "RunSoot Stage";
 
     public void run() {
         G.reset();
@@ -21,38 +21,36 @@ public class RunSootStage extends BaseStage {
         soot.Main.v().run(new String[]{});
     }
 
+    @Override
+    public String getStageName() {
+        return stageName;
+    }
+
     private void configureSoot() {
         soot.options.Options sootOption = soot.options.Options.v();
         sootOption.set_allow_phantom_refs(true);
         sootOption.set_ignore_resolution_errors(true);
-        sootOption.set_output_dir(OptionsArgs.getOutputDir().getAbsolutePath());
+        sootOption.set_output_dir(OptionsArgs.outputDir.getAbsolutePath());
         sootOption.set_unfriendly_mode(true);
         sootOption.set_whole_program(true);
         sootOption.set_whole_shimple(true);
-        sootOption.set_verbose(OptionsArgs.isVerboseMode());
+        sootOption.set_verbose(OptionsArgs.isVerboseMode);
         sootOption.set_hierarchy_dirs(true);
         sootOption.set_via_shimple(true);
         sootOption.set_process_multiple_dex(true);
         sootOption.set_keep_line_number(true);
 
-        int apiLevel = 0;
-        try {
-            apiLevel = Integer.parseInt(OptionsArgs.getInputApkFileInfo().getApkMeta().getTargetSdkVersion());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
 
         sootOption.set_soot_classpath(String.join(File.pathSeparator, Arrays.asList(
-                OptionsArgs.getConvertedJarFile().getAbsolutePath(),
-                OptionsArgs.getAndroidLibMap().get(apiLevel)
+                OptionsArgs.convertedJarFile.getAbsolutePath(),
+                OptionsArgs.androidLib
                 ))
         );
         sootOption.set_output_format(soot.options.Options.output_format_none);
         sootOption.set_exclude(OptionsArgs.excludedPackageNames);
 //        sootOption.set_include(OptionsArgs.includedPackageNames);
 
-        sootOption.set_process_dir(Arrays.asList(OptionsArgs.getConvertedJarFile().getAbsolutePath().split(File.pathSeparator)));
+        sootOption.set_process_dir(Arrays.asList(OptionsArgs.convertedJarFile.getAbsolutePath().split(File.pathSeparator)));
 //        if (CommandOptions.generateSleepingApk) {
 //            sootOption.set_exclude(emptyList());    // all class should be included to generate complete apk
 ////            sootOption.set_process_dir(sootOption.process_dir() + prepareSleeper());

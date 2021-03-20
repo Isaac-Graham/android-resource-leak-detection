@@ -1,4 +1,4 @@
-package cn.edu.sustech.cse.sqlab.leakdroid.stages.dex2Jar;
+package cn.edu.sustech.cse.sqlab.leakdroid.pipeline.stages.dex2Jar;
 /**
  * @author Isaac Chen
  * @email ccccym666@gmail.com

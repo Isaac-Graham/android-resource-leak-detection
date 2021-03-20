@@ -1,4 +1,4 @@
-package cn.edu.sustech.cse.sqlab.leakdroid.stages.dex2Jar;
+package cn.edu.sustech.cse.sqlab.leakdroid.pipeline.stages.dex2Jar;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,7 +32,7 @@ public class Dex2Jar2_0 extends Dex2Jar {
                 .optimizeSynchronized(false)
                 .to(outputJarFile.toPath());
 
-        OptionsArgs.setConvertedJarFile(outputJarFile);
+        OptionsArgs.convertedJarFile = outputJarFile;
         logger.info(String.format("Apk file is converted to %s", outputJarFile));
         return outputJarFile;
     }

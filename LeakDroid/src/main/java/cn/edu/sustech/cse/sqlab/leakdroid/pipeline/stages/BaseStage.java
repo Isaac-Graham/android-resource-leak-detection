@@ -1,4 +1,4 @@
-package cn.edu.sustech.cse.sqlab.leakdroid.stages;
+package cn.edu.sustech.cse.sqlab.leakdroid.pipeline.stages;
 
 import java.io.IOException;
 
@@ -8,7 +8,8 @@ import java.io.IOException;
  * @date 2021/2/3 22:17
  */
 public abstract class BaseStage {
-    protected String stageName = "Base";
 
     public abstract void run() throws IOException;
+
+    public abstract String getStageName();
 }

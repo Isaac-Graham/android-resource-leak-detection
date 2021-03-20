@@ -84,16 +84,16 @@ public class CFGDrawer extends BodyTransformer {
 
     private static void printDotGraph(Body body, DotGraph dotGraph) {
         boolean leak = body.getUnits().stream().anyMatch(unit -> unit.hasTag(ResourceLeakTag.name));
-        if (!leak && !OptionsArgs.outputAllDot()) {
+        if (!leak && !OptionsArgs.outputAllDot) {
             logger.info(String.format("Skip drawing %s", body.getMethod()));
             return;
         }
         logger.info(String.format("Drawing CFG of %s method", body.getMethod()));
         String baseFolder = leak ? "leak" : "not_leak";
         String packageName = body.getMethod().getDeclaringClass().getPackageName();
-        Path path = Paths.get(OptionsArgs.getOutputDir().getAbsolutePath(), baseFolder, packageName.replaceAll("\\.", "/"));
+        Path path = Paths.get(OptionsArgs.outputDir.getAbsolutePath(), baseFolder, packageName.replaceAll("\\.", "/"));
 
-        String predecessorPath = OptionsArgs.getOutputDir().getAbsolutePath();
+        String predecessorPath = OptionsArgs.outputDir.getAbsolutePath();
         try {
             Path pathCreate = Files.createDirectories(path);
             if (pathCreate.toFile().exists()) {
