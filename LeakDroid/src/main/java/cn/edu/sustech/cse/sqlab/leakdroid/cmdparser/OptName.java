@@ -16,4 +16,6 @@ public class OptName {
     public static final String longOverrideOutputDir = "override-output-dir";
     public static final String shortOutputAllDot = "oad";
     public static final String longOutputAllDot = "output-all-dot";
+    public static final String shortPackageOnly = "po";
+    public static final String longPackageOnly = "package-only";
 }

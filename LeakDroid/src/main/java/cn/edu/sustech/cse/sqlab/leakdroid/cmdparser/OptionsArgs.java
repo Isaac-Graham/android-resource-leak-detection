@@ -1,6 +1,7 @@
 package cn.edu.sustech.cse.sqlab.leakdroid.cmdparser;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -22,6 +23,7 @@ public class OptionsArgs {
     public static boolean isVerboseMode = true;
     public static boolean outputAllDot = false;
     public static boolean overrideOutputDir = false;
+    public static boolean onlyPackage = false;
     public static List<String> excludedPackageNames = Arrays.asList(
             "android.*",
             "androidx.*",
@@ -36,11 +38,10 @@ public class OptionsArgs {
             "com.squareup.okhttp.*",
             "com.alibaba.fastjson.*",
             "com.google.protobuf.*",
-            "com.bumptech.glide.*"
-    );
-
-    public static List<String> includedPackageNames = Arrays.asList(
+            "com.bumptech.glide.*",
             "java.*",
             "javax.*"
     );
+
+    public static List<String> includedPackageNames = new ArrayList<>();
 }

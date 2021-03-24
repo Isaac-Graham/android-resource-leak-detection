@@ -44,9 +44,10 @@ public class LoopExitPathUtil extends BasePathUtil implements Cloneable {
             Unit tail = mergedPathUtil.getPathTail();
             mergedPathUtil.callBack();
             if (mergedPathUtil.cfgPath.getPath().contains(tail)) {
-                continue;
+                basePathUtils.add(mergedPathUtil);
+            } else {
+                basePathUtils.addAll(mergedPathUtil.mergePathUtils(new LoopExitPathUtil(tail, currentLoop).runPath()));
             }
-            basePathUtils.addAll(mergedPathUtil.mergePathUtils(new LoopExitPathUtil(tail, currentLoop).runPath()));
         }
     }
 

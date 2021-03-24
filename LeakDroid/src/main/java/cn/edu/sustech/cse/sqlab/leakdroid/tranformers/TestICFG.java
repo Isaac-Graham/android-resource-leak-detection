@@ -1,23 +1,12 @@
 package cn.edu.sustech.cse.sqlab.leakdroid.tranformers;
 
 import cn.edu.sustech.cse.sqlab.leakdroid.annotation.PhaseName;
-import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.ICFGContext;
 import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.ResourceLeakDetector;
-import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.analyzer.PathAnalyzer;
-import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.analyzer.PathExtractor;
-import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.entities.cfgpath.BaseCFGPath;
-import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.utils.InterProcedureUtil;
 import cn.edu.sustech.cse.sqlab.leakdroid.util.ResourceUtil;
+import cn.edu.sustech.cse.sqlab.leakdroid.util.SootClassUtil;
 import cn.edu.sustech.cse.sqlab.leakdroid.util.SootMethodUtil;
-import cn.edu.sustech.cse.sqlab.leakdroid.util.UnitUtil;
 import org.apache.log4j.Logger;
 import soot.*;
-import soot.jimple.*;
-import soot.jimple.internal.*;
-import soot.jimple.toolkits.annotation.logic.LoopFinder;
-import soot.shimple.PhiExpr;
-import soot.shimple.internal.SPhiExpr;
-import soot.toolkits.graph.ExceptionalUnitGraph;
 
 import java.util.*;
 
@@ -33,28 +22,25 @@ public class TestICFG extends BodyTransformer {
 
     @Override
     protected void internalTransform(Body body, String s, Map<String, String> map) {
-//        if (!SootMethodUtil.getFullName(body.getMethod()).contains("foo"))
-//            return;
+        if (SootClassUtil.isExclude(body.getMethod().getDeclaringClass())) return;
         if (body.getMethod().toString().contains(SootMethod.staticInitializerName)) return;
 
+        logger.info(String.format("Start to analyze method: %s", SootMethodUtil.getFullName(body.getMethod())));
+        if (body.getUnits().stream().noneMatch(ResourceUtil::isRequest)) {
+            logger.info(String.format("No resource requested in method: %s. Break", SootMethodUtil.getFullName(body.getMethod())));
+            return;
+        }
+
+
         body.getUnits().stream().filter(ResourceUtil::isRequest).forEach(unit -> {
+////            try {
             new ResourceLeakDetector(unit).detect();
+////            } catch (StackOverflowError error) {
+////                logger.error("Stack overflow occurs on: " + SootMethodUtil.getFullName(body.getMethod()));
+////            }
         });
-//        Unit startUnit = body.getUnits().getFirst();
-//
-//        body.getUnits().forEach(unit -> {
-//            if (unit instanceof DefinitionStmt) {
-//                Value rightOp = UnitUtil.getDefineOp(unit, UnitUtil.rightOp);
-//                if (rightOp instanceof PhiExpr) {
-//                    logger.debug("###");
-//                    logger.debug(rightOp);
-//                    PhiExpr phiExpr = (PhiExpr) rightOp;
-//                    logger.debug(phiExpr.getArgs());
-////                    phiExpr.getArgs().forEach(arg -> {
-////                        logger.info(arg.getUnit());
-////                    });
-//                }
-//            }
-//        });
+
+
+        logger.info(String.format("End analyze method: %s", SootMethodUtil.getFullName(body.getMethod())));
     }
 }

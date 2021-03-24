@@ -29,9 +29,10 @@ public class SetupWorkingEnvironmentStage extends BaseStage {
     public static final String stageName = "Setup Working Environment Stage";
 
     @Override
-    public void run() throws IOException {
+    public void run() {
         OptionsArgs.outputAllDot = cmdLine.hasOption(OptName.shortOutputAllDot);
         OptionsArgs.overrideOutputDir = cmdLine.hasOption(OptName.shortOverrideOutputDir);
+        OptionsArgs.onlyPackage = cmdLine.hasOption(OptName.shortPackageOnly);
         initialOutputDir();
         cleanUpOutputDir();
         initialInputFile();
@@ -39,6 +40,7 @@ public class SetupWorkingEnvironmentStage extends BaseStage {
         initialAndroidSdkFolder();
         initialAndroidLibMap();
         initialTemporaryWorkingDirectory();
+        initialIncludedPackageNames();
     }
 
     @Override
@@ -154,5 +156,18 @@ public class SetupWorkingEnvironmentStage extends BaseStage {
         }
     }
 
+    private static void initialIncludedPackageNames() {
+        if (cmdLine.hasOption(OptName.shortPackageOnly)) {
+            if (OptionsArgs.inputApkFileInfo == null) {
+                throw new ParseOptionsException("Apk info has not been parsed");
+            }
+            try {
+                String packageName = OptionsArgs.inputApkFileInfo.getApkMeta().getPackageName();
+                OptionsArgs.includedPackageNames.add(String.format("%s.*", packageName));
+            } catch (IOException e) {
+                throw new ParseOptionsException("Fail to parse apk meta data");
+            }
+        }
+    }
 
 }

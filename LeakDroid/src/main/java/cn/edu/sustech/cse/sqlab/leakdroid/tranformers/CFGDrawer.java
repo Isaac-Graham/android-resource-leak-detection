@@ -4,6 +4,8 @@ import cn.edu.sustech.cse.sqlab.leakdroid.annotation.PhaseName;
 import cn.edu.sustech.cse.sqlab.leakdroid.cmdparser.OptionsArgs;
 import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.ICFGContext;
 import cn.edu.sustech.cse.sqlab.leakdroid.tags.ResourceLeakTag;
+import cn.edu.sustech.cse.sqlab.leakdroid.util.SootClassUtil;
+import cn.edu.sustech.cse.sqlab.leakdroid.util.SootMethodUtil;
 import cn.edu.sustech.cse.sqlab.leakdroid.util.UnitUtil;
 import org.apache.log4j.Logger;
 import soot.*;
@@ -36,6 +38,8 @@ public class CFGDrawer extends BodyTransformer {
 
     @Override
     protected void internalTransform(Body body, String s, Map<String, String> map) {
+        if (SootClassUtil.isExclude(body.getMethod().getDeclaringClass())) return;
+        if (body.getMethod().toString().contains(SootMethod.staticInitializerName)) return;
 //        if (true) {
 //            return;
 //        }

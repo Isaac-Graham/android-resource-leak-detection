@@ -2,12 +2,14 @@ package cn.edu.sustech.cse.sqlab.leakdroid.pipeline.stages;
 
 import cn.edu.sustech.cse.sqlab.leakdroid.tranformers.*;
 import cn.edu.sustech.cse.sqlab.leakdroid.util.PackManagerUtil;
+import com.google.common.collect.Lists;
 import org.apache.log4j.Logger;
 import soot.G;
 import cn.edu.sustech.cse.sqlab.leakdroid.cmdparser.OptionsArgs;
 import soot.PackManager;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 
 public class RunSootStage extends BaseStage {
@@ -47,8 +49,8 @@ public class RunSootStage extends BaseStage {
                 ))
         );
         sootOption.set_output_format(soot.options.Options.output_format_none);
+
         sootOption.set_exclude(OptionsArgs.excludedPackageNames);
-//        sootOption.set_include(OptionsArgs.includedPackageNames);
 
         sootOption.set_process_dir(Arrays.asList(OptionsArgs.convertedJarFile.getAbsolutePath().split(File.pathSeparator)));
 //        if (CommandOptions.generateSleepingApk) {
@@ -76,16 +78,4 @@ public class RunSootStage extends BaseStage {
 //        PackManager.v().
     }
 
-//    private String prepareSleeper() {
-//        InputStream sleeper = this.getClass().getResourceAsStream("helper/Sleeper.class");
-//        try {
-//            Path tempHelper = Files.createTempDirectory("").resolve("helper");
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//        check(tempHelper.toFile().mkdir())
-//        val tempSleeper = tempHelper.resolve("Sleeper.class")
-//        IOUtils.copy(sleeper, FileOutputStream(tempSleeper.toFile()))
-//        return tempHelper.parent.toAbsolutePath().toString()
-//    }
 }
