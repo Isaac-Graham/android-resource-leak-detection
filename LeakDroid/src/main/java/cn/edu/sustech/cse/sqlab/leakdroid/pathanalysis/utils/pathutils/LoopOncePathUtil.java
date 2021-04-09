@@ -14,7 +14,7 @@ import java.util.List;
  * @date 2021/3/11 17:15
  */
 public class LoopOncePathUtil extends BasePathUtil implements Cloneable {
-    private Loop currentLoop;
+    private final Loop currentLoop;
 
     public LoopOncePathUtil(Loop currentLoop) {
         this.currentLoop = currentLoop;

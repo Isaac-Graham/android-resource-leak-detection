@@ -33,11 +33,11 @@ public class TestICFG extends BodyTransformer {
 
 
         body.getUnits().stream().filter(ResourceUtil::isRequest).forEach(unit -> {
-////            try {
+            try {
             new ResourceLeakDetector(unit).detect();
-////            } catch (StackOverflowError error) {
-////                logger.error("Stack overflow occurs on: " + SootMethodUtil.getFullName(body.getMethod()));
-////            }
+            } catch (StackOverflowError error) {
+                logger.error("Stack overflow occurs on: " + SootMethodUtil.getFullName(body.getMethod()));
+            }
         });
 
 

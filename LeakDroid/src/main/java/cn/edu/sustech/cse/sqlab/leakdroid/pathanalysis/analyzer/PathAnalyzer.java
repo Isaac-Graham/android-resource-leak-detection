@@ -1,10 +1,12 @@
 package cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.analyzer;
 
+import cn.edu.sustech.cse.sqlab.leakdroid.cmdparser.OptionsArgs;
 import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.entities.cfgpath.BaseCFGPath;
 import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.utils.InterProcedureUtil;
 import cn.edu.sustech.cse.sqlab.leakdroid.tags.ResourceLeakTag;
 import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.ICFGContext;
 import cn.edu.sustech.cse.sqlab.leakdroid.util.ResourceUtil;
+import cn.edu.sustech.cse.sqlab.leakdroid.util.SootMethodUtil;
 import cn.edu.sustech.cse.sqlab.leakdroid.util.UnitUtil;
 import org.apache.log4j.Logger;
 import soot.SootMethod;
@@ -24,15 +26,12 @@ import java.util.*;
  */
 public class PathAnalyzer {
     private static final Logger logger = Logger.getLogger(PathAnalyzer.class);
-    private final HashMap<Value, List<Unit>> localDefHashMap;
     private final List<BaseCFGPath> paths;
     private final Set<SootMethod> meetMethods;
 
     public PathAnalyzer(List<BaseCFGPath> paths, Unit startUnit, Set<SootMethod> meetMethods) {
-        this.localDefHashMap = new HashMap<>();
         this.meetMethods = meetMethods;
         this.paths = paths;
-        initialLocalDefHashMap(startUnit);
         initialMeetMethod(startUnit);
     }
 
@@ -42,24 +41,12 @@ public class PathAnalyzer {
             if (this.analyze(path)) {
                 PathAnalyzer.reportStackUnitInfo(path);
                 res = true;
+                if (!OptionsArgs.outputAllLeakPaths) {
+                    break;
+                }
             }
         }
         return res;
-    }
-
-    private void initialLocalDefHashMap(Unit startUnit) {
-        SootMethod sootMethod = UnitUtil.getSootMethod(startUnit);
-        ExceptionalUnitGraph cfg = ICFGContext.getCFGFromMethod(sootMethod);
-        SimpleLocalDefs sld = new SimpleLocalDefs(cfg);
-        if (sootMethod == null) {
-            return;
-        }
-        sootMethod.getActiveBody().getLocals().forEach(local -> {
-            if (sld.getDefsOf(local).stream().anyMatch(unit -> !(unit instanceof DefinitionStmt))) {
-                logger.error(String.format("Error occurs: All should be DefinitionStmt in def list: %s", sld.getDefsOf(local)));
-            }
-            this.localDefHashMap.put(local, sld.getDefsOf(local));
-        });
     }
 
     private void initialMeetMethod(Unit unit) {
@@ -67,76 +54,77 @@ public class PathAnalyzer {
         this.meetMethods.add(sootMethod);
     }
 
-    private static Value getFirstVariable(Unit unit) {
-        if (unit instanceof InvokeStmt) {
-            return UnitUtil.getInvokeBase(unit);
-        } else if (unit instanceof DefinitionStmt) {
-            if (UnitUtil.getDefineOp(unit, UnitUtil.rightOp) instanceof ParameterRef) {
-                return UnitUtil.getDefineOp(unit, UnitUtil.leftOp);
+    private static void updateLocalVariable(Unit curUnit, List<Unit> curPath, Set<Value> localVariables) {
+        Value local = null;
+        if (curUnit instanceof InvokeStmt) {
+            if (ResourceUtil.isRequest(curUnit)) {
+                if (localVariables.isEmpty()) {
+                    local = UnitUtil.getInvokeBase(curUnit);
+                } else {
+                    InvokeStmt invokeStmt = (InvokeStmt) curUnit;
+                    for (Value arg : invokeStmt.getInvokeExpr().getArgs()) {
+                        if (localVariables.contains(arg)) {
+                            logger.debug(UnitUtil.getInvokeBase(curUnit));
+                        }
+                    }
+                }
+            }
+        } else if (curUnit instanceof DefinitionStmt) {
+            if (UnitUtil.getDefineOp(curUnit, UnitUtil.rightOp) instanceof ParameterRef) {
+                local = UnitUtil.getDefineOp(curUnit, UnitUtil.leftOp);
+            } else {
+                Value rightOp = UnitUtil.getDefineOp(curUnit, UnitUtil.rightOp);
+                if (rightOp instanceof PhiExpr) {
+                    rightOp = UnitUtil.getPhiValue(rightOp, curPath);
+                }
+                if (localVariables.contains(rightOp)) {
+                    local = UnitUtil.getDefineOp(curUnit, UnitUtil.leftOp);
+                }
             }
         }
-        return null;
+        if (local != null) {
+            localVariables.add(local);
+        }
     }
 
     private boolean analyze(BaseCFGPath cfgPath) {
-        Set<Value> localValuables = new HashSet<>();
+        Set<Value> localVariables = new HashSet<>();
         List<Unit> path = cfgPath.getPath();
         if (path.isEmpty()) return false;
-        localValuables.add(getFirstVariable(path.get(0)));
+        updateLocalVariable(path.get(0), Collections.emptyList(), localVariables);
         for (int i = 1; i < path.size(); i++) {
             Unit curUnit = path.get(i);
-            if (ResourceUtil.isRelease(curUnit, localValuables)) {
+            if (ResourceUtil.isRelease(curUnit, localVariables)) {
                 return false;
             } else if (curUnit instanceof IfStmt) {
                 if (i == path.size() - 1) {
                     logger.warn(String.format("IfStmt occurs in the last of a path: %s", path));
                     return true;
                 }
-                if (!branchReachable(localValuables, (IfStmt) curUnit, path.get(i + 1))) {
+                if (!branchReachable(localVariables, (IfStmt) curUnit, path.get(i + 1))) {
                     return false;
                 }
-            } else if (InterProcedureUtil.isInterProcedureCall(curUnit, localValuables)) {
+            } else if (InterProcedureUtil.isInterProcedureCall(curUnit, localVariables)) {
                 if (meetMethods.contains(InterProcedureUtil.getInvokeMethod(curUnit))) return true;
-                if (!InterProcedureUtil.dealInterProcedureCall(curUnit, localValuables, new HashSet<>(meetMethods))) {
+                if (!InterProcedureUtil.dealInterProcedureCall(curUnit, localVariables, new HashSet<>(meetMethods))) {
                     return false;
                 }
             }
-
-            Value localValueThisUnit = getLocalValueFromDefinitions(path.subList(0, i), curUnit, localValuables);
-            if (localValueThisUnit != null) {
-                localValuables.add(localValueThisUnit);
-            }
+            updateLocalVariable(curUnit, path.subList(0, i), localVariables);
+//            Value localValueThisUnit = getLocalValueFromDefinitions(path.subList(0, i), curUnit, localVariables);
+//            if (localValueThisUnit != null) {
+//                localVariables.add(localValueThisUnit);
+//            }
         }
         return true;
     }
 
-    private Value getLocalValueFromDefinitions(List<Unit> curPath, Unit curUnit, Set<Value> localValuables) {
-        if (!(curUnit instanceof DefinitionStmt)) {
-            return null;
-        }
-        Value rightOp = UnitUtil.getDefineOp(curUnit, UnitUtil.rightOp);
-        if (rightOp instanceof PhiExpr) {
-            rightOp = UnitUtil.getPhiValue(rightOp, curPath);
-        }
-        if (localValuables.contains(rightOp)) {
-            return UnitUtil.getDefineOp(curUnit, UnitUtil.leftOp);
-        }
-        return null;
-//        Set<Map.Entry<Value, List<Unit>>> entrySet = this.localDefHashMap.entrySet();
-//        for (Map.Entry<Value, List<Unit>> valueListEntry : entrySet) {
-//            for (Unit def : valueListEntry.getValue()) {
-//                if (def == nextUnit) {
-//                    Value rightOp = ((DefinitionStmt) def).getRightOp();
-//                    if (localValuables.contains(rightOp)) {
-//                        return ((DefinitionStmt) def).getLeftOp();
-//                    }
-//                }
-//            }
-//        }
-    }
-
     private static void reportStackUnitInfo(BaseCFGPath cfgPath) {
         List<Unit> path = cfgPath.getPath();
+        if (path.size() == 0) {
+            return;
+        }
+        SootMethod leakMethod = UnitUtil.getSootMethod(path.get(0));
         StringBuilder res = new StringBuilder();
         for (int i = 0; i < path.size(); i++) {
             Unit leakUnit = path.get(i);
@@ -149,8 +137,10 @@ public class PathAnalyzer {
             res.append(leakUnit).append(" -> ");
         }
         res.append("END");
-        logger.info(String.format("Resource leak path: %s", res));
+        logger.info(String.format("Resource leak method: %s\n" +
+                "\tResource leak path: %s", SootMethodUtil.getFullName(leakMethod), res));
     }
+
 
     private static boolean branchReachable(Set<Value> localValuables, IfStmt ifStmt, Unit nextUnit) {
         final String equal = "==";

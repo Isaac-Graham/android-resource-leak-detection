@@ -18,7 +18,7 @@ import java.util.Stack;
  */
 public class LoopStatus extends BasePathStatus implements Cloneable {
     private static final Logger logger = Logger.getLogger(LoopStatus.class);
-    private Loop currentLoop;
+    private final Loop currentLoop;
 
     public LoopStatus(Loop currentLoop) {
         this.currentLoop = currentLoop;
@@ -42,6 +42,7 @@ public class LoopStatus extends BasePathStatus implements Cloneable {
             cfg.getSuccsOf(unit).forEach(successor -> {
                 if (ResourceUtil.isRequest(unit) && UnitUtil.isCaughtExceptionRef(successor)) return;
                 if (!(unit instanceof InvokeStmt) && UnitUtil.isCaughtExceptionRef(successor)) return;
+//                if (currentLoop.getHead() == successor) return;
                 if (currentLoop.getLoopStatements().contains(successor)) {
                     successors.push(successor);
                 }

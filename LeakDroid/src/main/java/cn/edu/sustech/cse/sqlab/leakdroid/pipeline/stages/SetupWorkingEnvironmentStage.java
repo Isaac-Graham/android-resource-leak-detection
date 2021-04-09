@@ -33,10 +33,11 @@ public class SetupWorkingEnvironmentStage extends BaseStage {
         OptionsArgs.outputAllDot = cmdLine.hasOption(OptName.shortOutputAllDot);
         OptionsArgs.overrideOutputDir = cmdLine.hasOption(OptName.shortOverrideOutputDir);
         OptionsArgs.onlyPackage = cmdLine.hasOption(OptName.shortPackageOnly);
-        initialOutputDir();
-        cleanUpOutputDir();
+        OptionsArgs.outputAllLeakPaths = cmdLine.hasOption(OptName.shortAllLeakPaths);
         initialInputFile();
         initialInputApkFileInfo();
+        initialOutputDir();
+        cleanUpOutputDir();
         initialAndroidSdkFolder();
         initialAndroidLibMap();
         initialTemporaryWorkingDirectory();
@@ -68,8 +69,17 @@ public class SetupWorkingEnvironmentStage extends BaseStage {
     }
 
     private static void initialOutputDir() {
+        if (OptionsArgs.inputApkFileInfo == null) {
+            throw new ParseOptionsException("Error occurs: Apk file info not found");
+        }
+        String pkgName = "defult package name";
+        try {
+            pkgName = OptionsArgs.inputApkFileInfo.getApkMeta().getPackageName();
+        } catch (IOException e) {
+            logger.warn("Fail to get apk meta data");
+        }
         String outputDirPath = cmdLine.hasOption(OptName.shortOutputDir) ?
-                cmdLine.getOptionValue(OptName.shortOutputDir) : "./output/ssaOutput";
+                String.format("%s/%s", cmdLine.getOptionValue(OptName.shortOutputDir), pkgName) : "./output/ssaOutput";
         OptionsArgs.outputDir = new File(outputDirPath);
         if (!OptionsArgs.outputDir.exists()) {
             OptionsArgs.outputDir.mkdirs();
@@ -147,7 +157,7 @@ public class SetupWorkingEnvironmentStage extends BaseStage {
 
     private static void initialInputApkFileInfo() {
         if (OptionsArgs.inputApkFile == null) {
-            return;
+            throw new ParseOptionsException("Error occurs: Apk file not found.");
         }
         try {
             OptionsArgs.inputApkFileInfo = new ApkFile(OptionsArgs.inputApkFile);

@@ -25,7 +25,6 @@ public class PipeLine{
                 new RunSootStage()
         );
         stages.forEach(stage -> {
-            logger.info(stage.getClass());
             try {
                 logger.info(String.format("Start %s", stage.getStageName()));
                 stage.run();

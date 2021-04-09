@@ -18,4 +18,6 @@ public class OptName {
     public static final String longOutputAllDot = "output-all-dot";
     public static final String shortPackageOnly = "po";
     public static final String longPackageOnly = "package-only";
+    public static final String shortAllLeakPaths = "alp";
+    public static final String longAllLeakPaths = "all-leak-paths";
 }

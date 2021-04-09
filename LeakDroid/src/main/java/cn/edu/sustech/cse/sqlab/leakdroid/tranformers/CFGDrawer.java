@@ -9,21 +9,18 @@ import cn.edu.sustech.cse.sqlab.leakdroid.util.SootMethodUtil;
 import cn.edu.sustech.cse.sqlab.leakdroid.util.UnitUtil;
 import org.apache.log4j.Logger;
 import soot.*;
-import soot.jbco.util.SimpleExceptionalGraph;
-import soot.toolkits.graph.BriefUnitGraph;
-import soot.toolkits.graph.CompleteUnitGraph;
-import soot.toolkits.graph.ExceptionalBlockGraph;
-import soot.toolkits.graph.ExceptionalUnitGraph;
-import soot.toolkits.graph.pdg.EnhancedUnitGraph;
+import soot.toolkits.graph.*;
 import soot.util.cfgcmd.CFGToDotGraph;
 import soot.util.dot.DotGraph;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
 
 /**
  * @author Isaac Chen
@@ -40,16 +37,18 @@ public class CFGDrawer extends BodyTransformer {
     protected void internalTransform(Body body, String s, Map<String, String> map) {
         if (SootClassUtil.isExclude(body.getMethod().getDeclaringClass())) return;
         if (body.getMethod().toString().contains(SootMethod.staticInitializerName)) return;
-//        if (true) {
+//        if (!SootMethodUtil.getFullName(body.getMethod()).contains("constraintResource"))
 //            return;
-//        }
+        if (true) {
+            return;
+        }
         DotGraph dotGraph = generateDotGraphPlanA(body);
         printDotGraph(body, dotGraph);
     }
 
     private static DotGraph generateDotGraphPlanA(Body body) {
         ExceptionalUnitGraph cfg = ICFGContext.getCFGFromMethod(body.getMethod());
-        DotGraph dotGraph = new DotGraph(String.format("CFG of %s", body.getMethod()));
+        DotGraph dotGraph = new DotGraph(String.format("CFG of %s", SootMethodUtil.getFullName(body.getMethod())));
 
         body.getUnits().forEach(unit -> {
             if (unit.hasTag(ResourceLeakTag.name)) {
@@ -74,14 +73,6 @@ public class CFGDrawer extends BodyTransformer {
         return new CFGToDotGraph().drawCFG(cfg);
     }
 
-    private static String getFileName(SootMethod sootMethod) {
-        return String.format("%s_%s.dot",
-                sootMethod.getDeclaringClass().toString(),
-                sootMethod.getName())
-                .replace('<', 'l')
-                .replace('>', 'r');
-    }
-
     private static String getNodeName(Unit unit) {
         return String.format("%s\n%s", unit.toString(), unit.getClass().toString());
     }
@@ -89,13 +80,13 @@ public class CFGDrawer extends BodyTransformer {
     private static void printDotGraph(Body body, DotGraph dotGraph) {
         boolean leak = body.getUnits().stream().anyMatch(unit -> unit.hasTag(ResourceLeakTag.name));
         if (!leak && !OptionsArgs.outputAllDot) {
-            logger.info(String.format("Skip drawing %s", body.getMethod()));
+            logger.info(String.format("Skip drawing %s", SootMethodUtil.getFullName(body.getMethod())));
             return;
         }
-        logger.info(String.format("Drawing CFG of %s method", body.getMethod()));
+        logger.info(String.format("Drawing CFG of %s method", SootMethodUtil.getFullName(body.getMethod())));
         String baseFolder = leak ? "leak" : "not_leak";
-        String packageName = body.getMethod().getDeclaringClass().getPackageName();
-        Path path = Paths.get(OptionsArgs.outputDir.getAbsolutePath(), baseFolder, packageName.replaceAll("\\.", "/"));
+        String packageName = SootMethodUtil.getFolderName(body.getMethod());
+        Path path = Paths.get(OptionsArgs.outputDir.getAbsolutePath(), baseFolder, packageName.replaceAll("\\.", Matcher.quoteReplacement(File.separator)));
 
         String predecessorPath = OptionsArgs.outputDir.getAbsolutePath();
         try {
@@ -106,12 +97,11 @@ public class CFGDrawer extends BodyTransformer {
         } catch (IOException e) {
             // ignore
         }
-        dotGraph.plot(
-                Paths.get(predecessorPath,
-                        getFileName(body.getMethod())
-                ).toString());
+        dotGraph.plot(Paths.get(predecessorPath,
+                SootMethodUtil.getFileNameString(body.getMethod())
+        ).toString());
 
-        logger.info(String.format("CFG of %s method drawn", body.getMethod().toString()));
+        logger.info(String.format("CFG of %s method drawn", SootMethodUtil.getFullName(body.getMethod())));
     }
 
 }

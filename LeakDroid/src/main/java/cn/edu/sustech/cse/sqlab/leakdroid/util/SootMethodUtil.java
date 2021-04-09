@@ -6,6 +6,8 @@ import soot.shimple.Shimple;
 import soot.shimple.ShimpleBody;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author Isaac Chen
@@ -23,12 +25,17 @@ public class SootMethodUtil {
     }
 
     public static String getFileNameString(SootMethod sootMethod) {
-        Type[] parameterTypes = sootMethod.getParameterTypes().toArray(new Type[]{});
-        String[] parameterTypesString = Arrays.copyOf(parameterTypes, parameterTypes.length, String[].class);
-        return String.format("%s_%s_%s(%s)",
+        List<Type> parameterTypes = sootMethod.getParameterTypes();
+        String parameterTypesString = parameterTypes.stream().map(Type::toString).collect(Collectors.joining(","));
+
+        String fileName = String.format("%s_%s_%s(%s).dot",
                 SootMethodUtil.getClassName(sootMethod),
                 sootMethod.getReturnType(),
-                sootMethod.getName(), String.join(",", parameterTypesString));
+                sootMethod.getName(),
+                parameterTypesString);
+        return fileName
+                .replace('<', 'l')
+                .replace('>', 'r');
     }
 
     public static String getFolderName(SootMethod sootMethod) {

@@ -40,7 +40,7 @@ public class UnitUtil {
             sootClass.getMethods().forEach(sootMethod -> {
                 if (!sootMethod.hasActiveBody()) return;
                 SootMethodUtil.ensureSSA(sootMethod);
-//                SootMethodUtil.updateLocalName(sootMethod);
+                SootMethodUtil.updateLocalName(sootMethod);
                 Body body = sootMethod.getActiveBody();
                 body.getUnits().forEach(unit -> {
                     unit.addTag(new UnitMethodNameTag(sootMethod));
@@ -94,6 +94,9 @@ public class UnitUtil {
     public static Value getPhiValue(Value phi, List<Unit> path) {
         if (!(phi instanceof PhiExpr)) {
             logger.warn(String.format("Value is not phiExpr. value: %s, value class: %s", phi, phi.getClass()));
+            return null;
+        }
+        if (path == null) {
             return null;
         }
         PhiExpr phiExpr = (PhiExpr) phi;

@@ -66,6 +66,13 @@ public class OptionsParser {
                 .type(boolean.class)
                 .desc("Only the class in package will be analyzed if set")
                 .build());
+        options.addOption(Option.builder(OptName.shortAllLeakPaths)
+                .longOpt(OptName.longAllLeakPaths)
+                .argName("output all possible leak paths")
+                .hasArg(false)
+                .type(boolean.class)
+                .desc("Output all possible leak paths if plag set")
+                .build());
         try {
             commandLine = commandLineParser.parse(options, args);
         } catch (ParseException e) {
