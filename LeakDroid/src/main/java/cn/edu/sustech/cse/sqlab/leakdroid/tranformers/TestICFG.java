@@ -2,10 +2,13 @@ package cn.edu.sustech.cse.sqlab.leakdroid.tranformers;
 
 import cn.edu.sustech.cse.sqlab.leakdroid.annotation.PhaseName;
 import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.ResourceLeakDetector;
+import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.analyzer.PathExtractor;
+import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.entities.cfgpath.BaseCFGPath;
 import cn.edu.sustech.cse.sqlab.leakdroid.util.ResourceUtil;
 import cn.edu.sustech.cse.sqlab.leakdroid.util.SootClassUtil;
 import cn.edu.sustech.cse.sqlab.leakdroid.util.SootMethodUtil;
 import org.apache.log4j.Logger;
+import org.apache.lucene.util.RamUsageEstimator;
 import soot.*;
 
 import java.util.*;
@@ -34,7 +37,7 @@ public class TestICFG extends BodyTransformer {
 
         body.getUnits().stream().filter(ResourceUtil::isRequest).forEach(unit -> {
             try {
-            new ResourceLeakDetector(unit).detect();
+                new ResourceLeakDetector(unit).detect();
             } catch (StackOverflowError error) {
                 logger.error("Stack overflow occurs on: " + SootMethodUtil.getFullName(body.getMethod()));
             }
