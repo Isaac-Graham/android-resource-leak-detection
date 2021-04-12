@@ -35,6 +35,14 @@ public class UnitUtil {
         return null;
     }
 
+    public static Body getBody(Unit unit) {
+        SootMethod sootMethod = getSootMethod(unit);
+        if (sootMethod == null) {
+            return null;
+        }
+        return sootMethod.getActiveBody();
+    }
+
     public static void addMethodTag(Chain<SootClass> sootClasses) {
         sootClasses.forEach(sootClass -> {
             sootClass.getMethods().forEach(sootMethod -> {

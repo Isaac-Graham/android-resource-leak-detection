@@ -39,9 +39,9 @@ public class CFGDrawer extends BodyTransformer {
         if (body.getMethod().toString().contains(SootMethod.staticInitializerName)) return;
 //        if (!SootMethodUtil.getFullName(body.getMethod()).contains("constraintResource"))
 //            return;
-        if (true) {
-            return;
-        }
+//        if (true) {
+//            return;
+//        }
         DotGraph dotGraph = generateDotGraphPlanA(body);
         printDotGraph(body, dotGraph);
     }
