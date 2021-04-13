@@ -1,8 +1,8 @@
-package cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.utils.pathutils;
+package cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.old.utils.pathutils;
 
-import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.entities.cfgpath.BaseCFGPath;
-import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.entities.pathstatus.BasePathStatus;
-import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.utils.LoopUtil;
+import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.old.entities.cfgpath.BaseCFGPath;
+import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.old.entities.pathstatus.BasePathStatus;
+import cn.edu.sustech.cse.sqlab.leakdroid.util.LoopUtil;
 import soot.Unit;
 
 import java.util.ArrayList;
@@ -14,6 +14,7 @@ import java.util.Stack;
  * @email ccccym666@gmail.com
  * @date 2021/3/11 19:01
  */
+@Deprecated
 public abstract class BasePathUtil implements Cloneable {
     protected BasePathStatus pathStatus;
     protected BaseCFGPath cfgPath;

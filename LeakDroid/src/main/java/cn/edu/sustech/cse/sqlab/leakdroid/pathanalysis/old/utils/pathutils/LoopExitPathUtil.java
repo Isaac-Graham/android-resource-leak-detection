@@ -1,8 +1,8 @@
-package cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.utils.pathutils;
+package cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.old.utils.pathutils;
 
-import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.entities.cfgpath.LoopExitCFGPath;
-import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.entities.pathstatus.LoopStatus;
-import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.utils.LoopUtil;
+import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.old.entities.cfgpath.LoopExitCFGPath;
+import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.old.entities.pathstatus.LoopStatus;
+import cn.edu.sustech.cse.sqlab.leakdroid.util.LoopUtil;
 import soot.Unit;
 import soot.jimple.Stmt;
 import soot.jimple.toolkits.annotation.logic.Loop;
@@ -16,6 +16,7 @@ import java.util.List;
  * @email ccccym666@gmail.com
  * @date 2021/3/11 19:35
  */
+@Deprecated
 public class LoopExitPathUtil extends BasePathUtil implements Cloneable {
     private Loop currentLoop;
 

@@ -1,12 +1,15 @@
 package cn.edu.sustech.cse.sqlab.leakdroid.util;
 
+import org.apache.log4j.Logger;
+import soot.RefType;
+import soot.SootClass;
 import soot.SootMethod;
 import soot.Type;
 import soot.shimple.Shimple;
 import soot.shimple.ShimpleBody;
 
-import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 /**
@@ -15,21 +18,25 @@ import java.util.stream.Collectors;
  * @date 2021/3/4 16:50
  */
 public class SootMethodUtil {
+    private static final Logger logger = Logger.getLogger(SootMethodUtil.class);
 
     public static String getFullName(SootMethod sootMethod) {
-        return String.format("%s.%s", SootMethodUtil.getClassName(sootMethod), sootMethod.getName());
-    }
-
-    public static String getClassName(SootMethod sootMethod) {
-        return sootMethod.getDeclaringClass().getName();
+        return String.format("%s.%s", SootClassUtil.getFullName(sootMethod.getDeclaringClass()), sootMethod.getName());
     }
 
     public static String getFileNameString(SootMethod sootMethod) {
-        List<Type> parameterTypes = sootMethod.getParameterTypes();
-        String parameterTypesString = parameterTypes.stream().map(Type::toString).collect(Collectors.joining(","));
+        List<RefType> parameterRef = sootMethod.getParameterTypes()
+                .stream()
+                .map(type -> (RefType) type)
+                .collect(Collectors.toList());
+
+        String parameterTypesString = parameterRef
+                .stream()
+                .map(type -> SootClassUtil.getShortName(type.getSootClass()))
+                .collect(Collectors.joining(","));
 
         String fileName = String.format("%s_%s_%s(%s).dot",
-                SootMethodUtil.getClassName(sootMethod),
+                SootClassUtil.getShortName(sootMethod.getDeclaringClass()),
                 sootMethod.getReturnType(),
                 sootMethod.getName(),
                 parameterTypesString);

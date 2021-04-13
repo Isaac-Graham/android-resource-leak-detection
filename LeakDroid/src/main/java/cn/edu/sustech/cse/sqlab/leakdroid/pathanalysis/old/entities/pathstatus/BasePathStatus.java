@@ -1,4 +1,4 @@
-package cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.entities.pathstatus;
+package cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.old.entities.pathstatus;
 
 import soot.Unit;
 
@@ -11,6 +11,7 @@ import java.util.Stack;
  * @email ccccym666@gmail.com
  * @date 2021/3/11 19:02
  */
+@Deprecated
 public abstract class BasePathStatus implements Cloneable {
     public Stack<Unit> pathStack;
     public Stack<Stack<Unit>> neighborStack;

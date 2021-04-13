@@ -1,7 +1,7 @@
-package cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.utils;
+package cn.edu.sustech.cse.sqlab.leakdroid.util;
 
-import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.utils.pathutils.BasePathUtil;
-import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.utils.pathutils.LoopPathUtil;
+import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.old.utils.pathutils.BasePathUtil;
+import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.old.utils.pathutils.LoopPathUtil;
 import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.ICFGContext;
 import soot.Unit;
 import soot.jimple.toolkits.annotation.logic.Loop;

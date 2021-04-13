@@ -1,8 +1,8 @@
-package cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.utils.pathutils;
+package cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.old.utils.pathutils;
 
-import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.entities.cfgpath.CFGPath;
-import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.entities.pathstatus.PathStatus;
-import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.utils.LoopUtil;
+import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.old.entities.cfgpath.CFGPath;
+import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.old.entities.pathstatus.PathStatus;
+import cn.edu.sustech.cse.sqlab.leakdroid.util.LoopUtil;
 import soot.Unit;
 
 import java.util.List;
@@ -12,6 +12,7 @@ import java.util.List;
  * @email ccccym666@gmail.com
  * @date 2021/3/11 23:04
  */
+@Deprecated
 public class PathUtil extends BasePathUtil implements Cloneable {
     public PathUtil() {
         this.pathStatus = new PathStatus();

@@ -1,4 +1,4 @@
-package cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.entities.cfgpath;
+package cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.old.entities.cfgpath;
 
 import soot.Unit;
 
@@ -10,6 +10,7 @@ import java.util.List;
  * @email ccccym666@gmail.com
  * @date 2021/3/11 18:50
  */
+@Deprecated
 public abstract class BaseCFGPath implements Cloneable {
     protected List<Unit> path;
 

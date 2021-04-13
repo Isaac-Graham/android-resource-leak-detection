@@ -1,10 +1,10 @@
 package cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.analyzer;
 
 import cn.edu.sustech.cse.sqlab.leakdroid.cmdparser.OptionsArgs;
-import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.entities.cfgpath.BaseCFGPath;
+import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.old.entities.cfgpath.BaseCFGPath;
+import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.pathextractor.CFGPath;
 import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.utils.InterProcedureUtil;
 import cn.edu.sustech.cse.sqlab.leakdroid.tags.ResourceLeakTag;
-import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.ICFGContext;
 import cn.edu.sustech.cse.sqlab.leakdroid.util.ResourceUtil;
 import cn.edu.sustech.cse.sqlab.leakdroid.util.SootMethodUtil;
 import cn.edu.sustech.cse.sqlab.leakdroid.util.UnitUtil;
@@ -14,8 +14,6 @@ import soot.Unit;
 import soot.Value;
 import soot.jimple.*;
 import soot.shimple.PhiExpr;
-import soot.toolkits.graph.ExceptionalUnitGraph;
-import soot.toolkits.scalar.SimpleLocalDefs;
 
 import java.util.*;
 
@@ -26,10 +24,10 @@ import java.util.*;
  */
 public class PathAnalyzer {
     private static final Logger logger = Logger.getLogger(PathAnalyzer.class);
-    private final List<BaseCFGPath> paths;
+    private final List<CFGPath> paths;
     private final Set<SootMethod> meetMethods;
 
-    public PathAnalyzer(List<BaseCFGPath> paths, Unit startUnit, Set<SootMethod> meetMethods) {
+    public PathAnalyzer( Unit startUnit, List<CFGPath> paths,Set<SootMethod> meetMethods) {
         this.meetMethods = meetMethods;
         this.paths = paths;
         initialMeetMethod(startUnit);
@@ -37,7 +35,7 @@ public class PathAnalyzer {
 
     public boolean analyze() {
         boolean res = false;
-        for (BaseCFGPath path : paths) {
+        for (CFGPath path : paths) {
             if (this.analyze(path)) {
                 PathAnalyzer.reportStackUnitInfo(path);
                 res = true;
@@ -87,7 +85,7 @@ public class PathAnalyzer {
         }
     }
 
-    private boolean analyze(BaseCFGPath cfgPath) {
+    private boolean analyze(CFGPath cfgPath) {
         Set<Value> localVariables = new HashSet<>();
         List<Unit> path = cfgPath.getPath();
         if (path.isEmpty()) return false;
@@ -111,15 +109,11 @@ public class PathAnalyzer {
                 }
             }
             updateLocalVariable(curUnit, path.subList(0, i), localVariables);
-//            Value localValueThisUnit = getLocalValueFromDefinitions(path.subList(0, i), curUnit, localVariables);
-//            if (localValueThisUnit != null) {
-//                localVariables.add(localValueThisUnit);
-//            }
         }
         return true;
     }
 
-    private static void reportStackUnitInfo(BaseCFGPath cfgPath) {
+    private static void reportStackUnitInfo(CFGPath cfgPath) {
         List<Unit> path = cfgPath.getPath();
         if (path.size() == 0) {
             return;

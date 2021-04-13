@@ -28,4 +28,12 @@ public class SootClassUtil {
                             -> className.contains(pkgName.substring(0, pkgName.length() - 1)));
         }
     }
+
+    public static String getFullName(SootClass sootClass) {
+        return sootClass.getName();
+    }
+
+    public static String getShortName(SootClass sootClass) {
+        return sootClass.getShortName();
+    }
 }

@@ -1,13 +1,10 @@
 package cn.edu.sustech.cse.sqlab.leakdroid.util;
 
-import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.entities.cfgpath.BaseCFGPath;
 import cn.edu.sustech.cse.sqlab.leakdroid.tags.ResourceLeakTag;
 import cn.edu.sustech.cse.sqlab.leakdroid.tags.UnitMethodNameTag;
 import org.apache.log4j.Logger;
 import soot.*;
 import soot.jimple.*;
-import soot.jimple.internal.AbstractDefinitionStmt;
-import soot.jimple.internal.JIdentityStmt;
 import soot.shimple.PhiExpr;
 import soot.tagkit.Tag;
 import soot.util.Chain;

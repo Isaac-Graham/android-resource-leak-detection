@@ -1,4 +1,4 @@
-package cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.entities.cfgpath;
+package cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.old.entities.cfgpath;
 
 import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.ICFGContext;
 import org.apache.log4j.Logger;
@@ -9,6 +9,7 @@ import soot.toolkits.graph.ExceptionalUnitGraph;
  * @email ccccym666@gmail.com
  * @date 2021/3/12 15:21
  */
+@Deprecated
 public class CFGPath extends BaseCFGPath implements Cloneable {
     private final static Logger logger = Logger.getLogger(CFGPath.class);
 

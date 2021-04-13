@@ -54,7 +54,7 @@ public class InterProcedureUtil {
         if (!invokeMethod.hasActiveBody()) return false;
         Body body = invokeMethod.getActiveBody();
         Unit startUnit = getStartUnit(body, argIndex);
-        return new ResourceLeakDetector(startUnit, meetMethods).detect();
+        return ResourceLeakDetector.detect(startUnit, meetMethods);
     }
 
     public static Unit getStartUnit(Body body, int argIndex) {

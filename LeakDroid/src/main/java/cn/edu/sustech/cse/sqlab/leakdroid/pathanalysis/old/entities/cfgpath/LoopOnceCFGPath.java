@@ -1,4 +1,4 @@
-package cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.entities.cfgpath;
+package cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.old.entities.cfgpath;
 
 import org.apache.log4j.Logger;
 import soot.jimple.toolkits.annotation.logic.Loop;
@@ -8,6 +8,7 @@ import soot.jimple.toolkits.annotation.logic.Loop;
  * @email ccccym666@gmail.com
  * @date 2021/3/11 16:22
  */
+@Deprecated
 public class LoopOnceCFGPath extends BaseCFGPath implements Cloneable {
     private static final Logger logger = Logger.getLogger(LoopOnceCFGPath.class);
     private Loop currentLoop;

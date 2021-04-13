@@ -1,4 +1,4 @@
-package cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.entities.cfgpath;
+package cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.old.entities.cfgpath;
 
 import soot.jimple.toolkits.annotation.logic.Loop;
 
@@ -7,6 +7,7 @@ import soot.jimple.toolkits.annotation.logic.Loop;
  * @email ccccym666@gmail.com
  * @date 2021/3/11 17:11
  */
+@Deprecated
 public class LoopExitCFGPath extends BaseCFGPath implements Cloneable {
     private Loop currentLoop;
 

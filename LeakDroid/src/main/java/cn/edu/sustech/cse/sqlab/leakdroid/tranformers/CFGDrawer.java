@@ -4,6 +4,7 @@ import cn.edu.sustech.cse.sqlab.leakdroid.annotation.PhaseName;
 import cn.edu.sustech.cse.sqlab.leakdroid.cmdparser.OptionsArgs;
 import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.ICFGContext;
 import cn.edu.sustech.cse.sqlab.leakdroid.tags.ResourceLeakTag;
+import cn.edu.sustech.cse.sqlab.leakdroid.util.ResourceUtil;
 import cn.edu.sustech.cse.sqlab.leakdroid.util.SootClassUtil;
 import cn.edu.sustech.cse.sqlab.leakdroid.util.SootMethodUtil;
 import cn.edu.sustech.cse.sqlab.leakdroid.util.UnitUtil;
@@ -18,8 +19,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 
 /**
@@ -31,6 +31,8 @@ import java.util.regex.Matcher;
 @PhaseName(name = "stp.drawcfg")
 public class CFGDrawer extends BodyTransformer {
     private final static Logger logger = Logger.getLogger(CFGDrawer.class);
+    private static final String leakFolder = "leak";
+    private static final String notLeakFolder = "not_leak";
 
 
     @Override
@@ -42,8 +44,54 @@ public class CFGDrawer extends BodyTransformer {
 //        if (true) {
 //            return;
 //        }
-        DotGraph dotGraph = generateDotGraphPlanA(body);
+        if (!ICFGContext.sootMethodNames.contains(SootMethodUtil.getFullName(body.getMethod())))
+            return;
+        DotGraph dotGraph = generateDotGraphPlanC(reachableUnits(body), body);
         printDotGraph(body, dotGraph);
+    }
+
+    private static List<Unit> reachableUnits(Body body) {
+        List<Unit> res = new ArrayList<>();
+        Set<Unit> metUnits = new HashSet<>();
+        body.getUnits().stream().filter(ResourceUtil::isRequest).forEach(unit -> {
+            ExceptionalUnitGraph cfg = ICFGContext.getCFGFromMethod(body.getMethod());
+            Stack<Unit> stack = new Stack<>();
+            stack.add(unit);
+            res.add(unit);
+            metUnits.add(unit);
+            while (!stack.isEmpty()) {
+                Unit top = stack.pop();
+                cfg.getSuccsOf(top).forEach(successor -> {
+                    if (metUnits.contains(successor)) return;
+                    metUnits.add(successor);
+                    stack.add(successor);
+                    res.add(successor);
+                });
+            }
+        });
+        return res;
+    }
+
+    private static DotGraph generateDotGraphPlanC(List<Unit> reachableUnits, Body body) {
+        ExceptionalUnitGraph cfg = ICFGContext.getCFGFromMethod(body.getMethod());
+        DotGraph dotGraph = new DotGraph(String.format("CFG of %s", SootMethodUtil.getFullName(body.getMethod())));
+        reachableUnits.forEach(unit -> {
+            if (unit.hasTag(ResourceLeakTag.name)) {
+                dotGraph.drawNode(getNodeName(unit)).setAttribute("color", "red");
+            } else {
+                dotGraph.drawNode(getNodeName(unit)).setAttribute("color", "black");
+            }
+            List<Unit> successors = cfg.getSuccsOf(unit);
+            successors.forEach(successor -> {
+                if (unit.hasTag(ResourceLeakTag.name)
+                        && UnitUtil.getResourceLeakTag(unit).getSuccessors().contains(successor)) {
+                    dotGraph.drawEdge(getNodeName(unit), getNodeName(successor)).setAttribute("color", "red");
+                } else {
+                    dotGraph.drawEdge(getNodeName(unit), getNodeName(successor)).setAttribute("color", "black");
+                }
+            });
+        });
+        return dotGraph;
     }
 
     private static DotGraph generateDotGraphPlanA(Body body) {
@@ -58,7 +106,8 @@ public class CFGDrawer extends BodyTransformer {
             }
             List<Unit> successors = cfg.getSuccsOf(unit);
             successors.forEach(successor -> {
-                if (unit.hasTag(ResourceLeakTag.name) && UnitUtil.getResourceLeakTag(unit).getSuccessors().contains(successor)) {
+                if (unit.hasTag(ResourceLeakTag.name)
+                        && UnitUtil.getResourceLeakTag(unit).getSuccessors().contains(successor)) {
                     dotGraph.drawEdge(getNodeName(unit), getNodeName(successor)).setAttribute("color", "red");
                 } else {
                     dotGraph.drawEdge(getNodeName(unit), getNodeName(successor)).setAttribute("color", "black");
@@ -74,19 +123,22 @@ public class CFGDrawer extends BodyTransformer {
     }
 
     private static String getNodeName(Unit unit) {
-        return String.format("%s\n%s", unit.toString(), unit.getClass().toString());
+        return unit.toString();
+//        return String.format("%s\n%s", unit.toString(), unit.getClass().toString());
     }
 
     private static void printDotGraph(Body body, DotGraph dotGraph) {
         boolean leak = body.getUnits().stream().anyMatch(unit -> unit.hasTag(ResourceLeakTag.name));
         if (!leak && !OptionsArgs.outputAllDot) {
-            logger.info(String.format("Skip drawing %s", SootMethodUtil.getFullName(body.getMethod())));
+            logger.error(String.format("Skip drawing %s", SootMethodUtil.getFullName(body.getMethod())));
             return;
         }
-        logger.info(String.format("Drawing CFG of %s method", SootMethodUtil.getFullName(body.getMethod())));
-        String baseFolder = leak ? "leak" : "not_leak";
+        logger.error(String.format("Drawing CFG of %s method", SootMethodUtil.getFullName(body.getMethod())));
+        String baseFolder = leak ? leakFolder : notLeakFolder;
         String packageName = SootMethodUtil.getFolderName(body.getMethod());
-        Path path = Paths.get(OptionsArgs.outputDir.getAbsolutePath(), baseFolder, packageName.replaceAll("\\.", Matcher.quoteReplacement(File.separator)));
+        Path path = Paths.get(OptionsArgs.outputDir.getAbsolutePath(),
+                baseFolder,
+                packageName.replaceAll("\\.", Matcher.quoteReplacement(File.separator)));
 
         String predecessorPath = OptionsArgs.outputDir.getAbsolutePath();
         try {
@@ -95,13 +147,16 @@ public class CFGDrawer extends BodyTransformer {
                 predecessorPath = pathCreate.toString();
             }
         } catch (IOException e) {
+            logger.error(e.getMessage());
             // ignore
         }
         dotGraph.plot(Paths.get(predecessorPath,
                 SootMethodUtil.getFileNameString(body.getMethod())
         ).toString());
 
-        logger.info(String.format("CFG of %s method drawn", SootMethodUtil.getFullName(body.getMethod())));
+        logger.error(Paths.get(predecessorPath,
+                SootMethodUtil.getFileNameString(body.getMethod())));
+        logger.error(String.format("CFG of %s method drawn", SootMethodUtil.getFullName(body.getMethod())));
     }
 
 }

@@ -1,4 +1,4 @@
-package cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.utils.pathutils;
+package cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.old.utils.pathutils;
 
 import soot.Unit;
 import soot.jimple.toolkits.annotation.logic.Loop;
@@ -11,6 +11,7 @@ import java.util.List;
  * @email ccccym666@gmail.com
  * @date 2021/3/9 14:51
  */
+@Deprecated
 public class LoopPathUtil extends BasePathUtil implements Cloneable {
     private final LoopOncePathUtil loopOncePathUtil;
     private final LoopExitPathUtil loopExitPathUtil;

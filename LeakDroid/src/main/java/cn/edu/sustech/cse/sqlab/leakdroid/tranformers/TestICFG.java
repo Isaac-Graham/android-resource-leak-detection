@@ -1,15 +1,15 @@
 package cn.edu.sustech.cse.sqlab.leakdroid.tranformers;
 
 import cn.edu.sustech.cse.sqlab.leakdroid.annotation.PhaseName;
+import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.ICFGContext;
 import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.ResourceLeakDetector;
-import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.entities.cfgpath.BaseCFGPath;
-import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.newPkg.pathextractor.PathExtractor;
+import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.pathextractor.CFGPath;
+import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.pathextractor.PathExtractor;
 import cn.edu.sustech.cse.sqlab.leakdroid.util.ResourceUtil;
 import cn.edu.sustech.cse.sqlab.leakdroid.util.SootClassUtil;
 import cn.edu.sustech.cse.sqlab.leakdroid.util.SootMethodUtil;
 import com.google.common.collect.Lists;
 import org.apache.log4j.Logger;
-import org.apache.lucene.util.RamUsageEstimator;
 import soot.*;
 
 import java.util.*;
@@ -29,28 +29,28 @@ public class TestICFG extends BodyTransformer {
         if (SootClassUtil.isExclude(body.getMethod().getDeclaringClass())) return;
         if (body.getMethod().toString().contains(SootMethod.staticInitializerName)) return;
 
+        if (!ICFGContext.sootMethodNames.contains(SootMethodUtil.getFullName(body.getMethod())))
+            return;
         logger.info(String.format("Start to analyze method: %s", SootMethodUtil.getFullName(body.getMethod())));
         if (body.getUnits().stream().noneMatch(ResourceUtil::isRequest)) {
             logger.info(String.format("No resource requested in method: %s. Break", SootMethodUtil.getFullName(body.getMethod())));
             return;
         }
-
-        if (!SootMethodUtil.getFullName(body.getMethod()).contains("cn.edu.sustech.cse.sqlab.testSoot.MainActivity.loopTest"))
-            return;
-        body.getUnits().stream().filter(ResourceUtil::isRequest).forEach(unit -> {
-            PathExtractor.extractPath(unit, Lists.newArrayList(body.getUnits()));
-        });
-
-
+        PathExtractor.extractPath(body.getUnits().getFirst());
+//        logger.info("done");
+//        body.getUnits().stream().filter(ResourceUtil::isRequest).forEach(unit -> {
+//            List<CFGPath> paths = PathExtractor.extractPath(unit);
+//            logger.info("done");
+//        });
 //        body.getUnits().stream().filter(ResourceUtil::isRequest).forEach(unit -> {
 //            try {
-//                new ResourceLeakDetector(unit).detect();
+//                ResourceLeakDetector.detect(unit);
 //            } catch (StackOverflowError error) {
 //                logger.error("Stack overflow occurs on: " + SootMethodUtil.getFullName(body.getMethod()));
 //            }
 //        });
+
 //
-//
-//        logger.info(String.format("End analyze method: %s", SootMethodUtil.getFullName(body.getMethod())));
+        logger.info(String.format("End analyze method: %s", SootMethodUtil.getFullName(body.getMethod())));
     }
 }
