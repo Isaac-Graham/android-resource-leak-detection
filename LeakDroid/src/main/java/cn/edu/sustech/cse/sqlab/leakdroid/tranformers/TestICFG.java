@@ -13,6 +13,7 @@ import org.apache.log4j.Logger;
 import soot.*;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author Isaac Chen
@@ -29,28 +30,16 @@ public class TestICFG extends BodyTransformer {
         if (SootClassUtil.isExclude(body.getMethod().getDeclaringClass())) return;
         if (body.getMethod().toString().contains(SootMethod.staticInitializerName)) return;
 
-        if (!ICFGContext.sootMethodNames.contains(SootMethodUtil.getFullName(body.getMethod())))
-            return;
-        logger.info(String.format("Start to analyze method: %s", SootMethodUtil.getFullName(body.getMethod())));
         if (body.getUnits().stream().noneMatch(ResourceUtil::isRequest)) {
             logger.info(String.format("No resource requested in method: %s. Break", SootMethodUtil.getFullName(body.getMethod())));
             return;
         }
-        PathExtractor.extractPath(body.getUnits().getFirst());
-//        logger.info("done");
-//        body.getUnits().stream().filter(ResourceUtil::isRequest).forEach(unit -> {
-//            List<CFGPath> paths = PathExtractor.extractPath(unit);
-//            logger.info("done");
-//        });
-//        body.getUnits().stream().filter(ResourceUtil::isRequest).forEach(unit -> {
-//            try {
-//                ResourceLeakDetector.detect(unit);
-//            } catch (StackOverflowError error) {
-//                logger.error("Stack overflow occurs on: " + SootMethodUtil.getFullName(body.getMethod()));
-//            }
-//        });
+        logger.info(String.format("Start to analyze method: %s", SootMethodUtil.getFullName(body.getMethod())));
 
-//
+        body.getUnits().stream().filter(ResourceUtil::isRequest).forEach(ResourceLeakDetector::detect);
+
         logger.info(String.format("End analyze method: %s", SootMethodUtil.getFullName(body.getMethod())));
     }
+
+
 }

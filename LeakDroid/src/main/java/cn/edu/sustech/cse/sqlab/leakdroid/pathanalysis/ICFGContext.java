@@ -24,31 +24,6 @@ public class ICFGContext {
     private static final HashMap<SootMethod, ExceptionalUnitGraph> cfgGraphs = new HashMap<>();
     private static final HashMap<SootMethod, Set<Loop>> methodLoops = new HashMap<>();
     public static final Set<SootMethod> processingMethods = new HashSet<>();
-    public static List<String> sootMethodNames = Arrays.asList(
-//            "org.sufficientlysecure.keychain.keyimport.Keyserver.readAll",
-//            "org.sufficientlysecure.keychain.pgp.PgpDecryptVerify.verifyCleartextSignature",
-//            "org.sufficientlysecure.keychain.provider.KeychainDatabase.copy",
-//            "org.sufficientlysecure.keychain.remote.RemoteService.getPackageCertificate",
-//            "org.sufficientlysecure.keychain.operations.ImportExportOperation.exportKeyRings",
-//            "org.sufficientlysecure.keychain.provider.ProviderHelper.getKeyRingAsArmoredString",
-//            "org.sufficientlysecure.keychain.operations.ImportExportOperation.uploadKeyRingToServer",
-//            "org.sufficientlysecure.keychain.ui.ViewKeyAdvShareFragment.share",
-            "org.sufficientlysecure.keychain.pgp.PgpSignEncryptOperation.execute"
-//            "org.sufficientlysecure.keychain.pgp.PgpDecryptVerify.execute",
-//            "org.sufficientlysecure.keychain.util.ParcelableFileCache.readCache",
-//            "org.sufficientlysecure.keychain.keyimport.HkpKeyserver.add"
-//            "org.sufficientlysecure.keychain.pgp.UncachedKeyRing.extractPublicKeyRing",
-//            "org.sufficientlysecure.keychain.pgp.WrappedUserAttribute.getEncoded",
-//            "org.sufficientlysecure.keychain.util.PositionAwareInputStream.<init>",
-//            "org.sufficientlysecure.keychain.util.TlsHelper.addStaticCA",
-//            "org.sufficientlysecure.keychain.pgp.WrappedUserAttribute.writeObject",
-//            "org.sufficientlysecure.keychain.util.PRNGFixes$LinuxPRNGSecureRandom.getUrandomInputStream",
-//            "org.sufficientlysecure.keychain.util.PRNGFixes$LinuxPRNGSecureRandom.getUrandomOutputStream",
-//            "org.sufficientlysecure.keychain.util.ParcelableFileCache.writeCache",
-//            "org.sufficientlysecure.keychain.util.PRNGFixes.generateSeed",
-//            "org.sufficientlysecure.keychain.operations.ImportExportOperation.exportToFile",
-//            "org.sufficientlysecure.keychain.operations.SignEncryptOperation.execute"
-    );
 
 
     public static void addCFGFromMethod(SootMethod sootMethod) {

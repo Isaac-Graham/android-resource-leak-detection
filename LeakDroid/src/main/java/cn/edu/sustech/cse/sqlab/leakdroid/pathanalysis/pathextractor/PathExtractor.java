@@ -18,15 +18,14 @@ import java.util.*;
  */
 public class PathExtractor {
     private static final Logger logger = Logger.getLogger(PathExtractor.class);
-
-    public static List<CFGPath> extractPath(Unit startUnit) {
+    public boolean isEnd = false;
+    public List<CFGPath> extractPath(Unit startUnit) {
         List<CFGPath> paths = new ArrayList<>();
         SootMethod curMethod = UnitUtil.getSootMethod(startUnit);
-        if (curMethod != null) {
-            logger.info(String.format("Path extraction starts: %s", SootMethodUtil.getFullName(curMethod)));
-        }
+        logger.info(String.format("Path extraction starts: %s", SootMethodUtil.getFullName(curMethod)));
         ExtractorUtil extractorUtil = new ExtractorUtil(startUnit);
-        while (!extractorUtil.dfsStack.empty()) {
+
+        while (!extractorUtil.dfsStack.empty() && !isEnd) {
             Unit topUnit = extractorUtil.dfsStack.peek();
             List<Unit> successors = extractorUtil.getSuccessors();
             if (successors.isEmpty()) {
@@ -39,9 +38,8 @@ public class PathExtractor {
                 extractorUtil.meetUnit(successor);
             }
         }
-        if (curMethod != null) {
-            logger.info(String.format("Path extraction ends: %s", SootMethodUtil.getFullName(curMethod)));
-        }
+
+        logger.info(String.format("Path extraction ends: %s", SootMethodUtil.getFullName(curMethod)));
         return paths;
     }
 
@@ -53,4 +51,5 @@ public class PathExtractor {
         }
         return unitGraph.getTails().contains(topUnit);
     }
+
 }

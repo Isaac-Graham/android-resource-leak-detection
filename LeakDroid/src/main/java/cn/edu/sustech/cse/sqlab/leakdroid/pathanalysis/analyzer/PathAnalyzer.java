@@ -1,7 +1,6 @@
 package cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.analyzer;
 
 import cn.edu.sustech.cse.sqlab.leakdroid.cmdparser.OptionsArgs;
-import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.old.entities.cfgpath.BaseCFGPath;
 import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.pathextractor.CFGPath;
 import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.utils.InterProcedureUtil;
 import cn.edu.sustech.cse.sqlab.leakdroid.tags.ResourceLeakTag;
@@ -24,16 +23,15 @@ import java.util.*;
  */
 public class PathAnalyzer {
     private static final Logger logger = Logger.getLogger(PathAnalyzer.class);
-    private final List<CFGPath> paths;
     private final Set<SootMethod> meetMethods;
+    public boolean isEnd = false;
 
-    public PathAnalyzer( Unit startUnit, List<CFGPath> paths,Set<SootMethod> meetMethods) {
+    public PathAnalyzer(Unit startUnit, Set<SootMethod> meetMethods) {
         this.meetMethods = meetMethods;
-        this.paths = paths;
         initialMeetMethod(startUnit);
     }
 
-    public boolean analyze() {
+    public boolean analyze(List<CFGPath> paths) {
         boolean res = false;
         for (CFGPath path : paths) {
             if (this.analyze(path)) {
@@ -90,7 +88,8 @@ public class PathAnalyzer {
         List<Unit> path = cfgPath.getPath();
         if (path.isEmpty()) return false;
         updateLocalVariable(path.get(0), Collections.emptyList(), localVariables);
-        for (int i = 1; i < path.size(); i++) {
+
+        for (int i = 1; i < path.size() && !isEnd; i++) {
             Unit curUnit = path.get(i);
             if (ResourceUtil.isRelease(curUnit, localVariables)) {
                 return false;
@@ -110,6 +109,8 @@ public class PathAnalyzer {
             }
             updateLocalVariable(curUnit, path.subList(0, i), localVariables);
         }
+
+
         return true;
     }
 

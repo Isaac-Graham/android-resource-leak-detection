@@ -2,7 +2,10 @@ package cn.edu.sustech.cse.sqlab.leakdroid;
 
 import cn.edu.sustech.cse.sqlab.leakdroid.cmdparser.OptionsParser;
 import cn.edu.sustech.cse.sqlab.leakdroid.pipeline.PipeLine;
+import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Logger;
+import org.apache.log4j.PatternLayout;
 
 import java.io.IOException;
 

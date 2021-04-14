@@ -25,14 +25,16 @@ public class SootMethodUtil {
     }
 
     public static String getFileNameString(SootMethod sootMethod) {
-        List<RefType> parameterRef = sootMethod.getParameterTypes()
-                .stream()
-                .map(type -> (RefType) type)
-                .collect(Collectors.toList());
 
-        String parameterTypesString = parameterRef
+        String parameterTypesString = sootMethod.getParameterTypes()
                 .stream()
-                .map(type -> SootClassUtil.getShortName(type.getSootClass()))
+                .map(type -> {
+                    if (type instanceof RefType) {
+                        return SootClassUtil.getShortName(((RefType) type).getSootClass());
+                    } else {
+                        return type.toString();
+                    }
+                })
                 .collect(Collectors.joining(","));
 
         String fileName = String.format("%s_%s_%s(%s).dot",
