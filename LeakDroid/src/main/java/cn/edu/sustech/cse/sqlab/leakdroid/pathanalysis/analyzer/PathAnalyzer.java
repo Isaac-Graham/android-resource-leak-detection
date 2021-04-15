@@ -1,6 +1,7 @@
 package cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.analyzer;
 
 import cn.edu.sustech.cse.sqlab.leakdroid.cmdparser.OptionsArgs;
+import cn.edu.sustech.cse.sqlab.leakdroid.entities.LeakIdentifier;
 import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.pathextractor.CFGPath;
 import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.utils.InterProcedureUtil;
 import cn.edu.sustech.cse.sqlab.leakdroid.tags.ResourceLeakTag;
@@ -15,6 +16,9 @@ import soot.jimple.*;
 import soot.shimple.PhiExpr;
 
 import java.util.*;
+
+import static cn.edu.sustech.cse.sqlab.leakdroid.entities.LeakIdentifier.NOT_LEAK;
+import static cn.edu.sustech.cse.sqlab.leakdroid.entities.LeakIdentifier.LEAK;
 
 /**
  * @author Isaac Chen
@@ -31,12 +35,12 @@ public class PathAnalyzer {
         initialMeetMethod(startUnit);
     }
 
-    public boolean analyze(List<CFGPath> paths) {
-        boolean res = false;
+    public LeakIdentifier analyze(List<CFGPath> paths) {
+        LeakIdentifier res = NOT_LEAK;
         for (CFGPath path : paths) {
-            if (this.analyze(path)) {
+            if (this.analyze(path) == LEAK) {
                 PathAnalyzer.reportStackUnitInfo(path);
-                res = true;
+                res = LeakIdentifier.LEAK;
                 if (!OptionsArgs.outputAllLeakPaths) {
                     break;
                 }
@@ -83,35 +87,34 @@ public class PathAnalyzer {
         }
     }
 
-    private boolean analyze(CFGPath cfgPath) {
+    private LeakIdentifier analyze(CFGPath cfgPath) {
         Set<Value> localVariables = new HashSet<>();
         List<Unit> path = cfgPath.getPath();
-        if (path.isEmpty()) return false;
+        if (path.isEmpty()) return NOT_LEAK;
         updateLocalVariable(path.get(0), Collections.emptyList(), localVariables);
 
         for (int i = 1; i < path.size() && !isEnd; i++) {
             Unit curUnit = path.get(i);
             if (ResourceUtil.isRelease(curUnit, localVariables)) {
-                return false;
+                return NOT_LEAK;
             } else if (curUnit instanceof IfStmt) {
                 if (i == path.size() - 1) {
                     logger.warn(String.format("IfStmt occurs in the last of a path: %s", path));
-                    return true;
+                    return LEAK;
                 }
                 if (!branchReachable(localVariables, (IfStmt) curUnit, path.get(i + 1))) {
-                    return false;
+                    return NOT_LEAK;
                 }
             } else if (InterProcedureUtil.isInterProcedureCall(curUnit, localVariables)) {
-                if (meetMethods.contains(InterProcedureUtil.getInvokeMethod(curUnit))) return true;
-                if (!InterProcedureUtil.dealInterProcedureCall(curUnit, localVariables, new HashSet<>(meetMethods))) {
-                    return false;
+                if (meetMethods.contains(InterProcedureUtil.getInvokeMethod(curUnit))) return LEAK;
+                if (InterProcedureUtil.dealInterProcedureCall(curUnit, localVariables, new HashSet<>(meetMethods)) == NOT_LEAK) {
+                    return NOT_LEAK;
                 }
             }
             updateLocalVariable(curUnit, path.subList(0, i), localVariables);
         }
 
-
-        return true;
+        return LEAK;
     }
 
     private static void reportStackUnitInfo(CFGPath cfgPath) {

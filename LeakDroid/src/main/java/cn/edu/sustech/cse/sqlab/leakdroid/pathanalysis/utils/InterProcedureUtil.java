@@ -1,5 +1,6 @@
 package cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.utils;
 
+import cn.edu.sustech.cse.sqlab.leakdroid.entities.LeakIdentifier;
 import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.ResourceLeakDetector;
 import org.apache.log4j.Logger;
 import soot.*;
@@ -10,6 +11,8 @@ import soot.jimple.internal.JIdentityStmt;
 
 import java.util.List;
 import java.util.Set;
+
+import static cn.edu.sustech.cse.sqlab.leakdroid.entities.LeakIdentifier.NOT_LEAK;
 
 /**
  * @author Isaac Chen
@@ -47,11 +50,11 @@ public class InterProcedureUtil {
         return invokeStmt.getInvokeExpr().getMethod();
     }
 
-    public static boolean dealInterProcedureCall(Unit unit, Set<Value> localValuables, Set<SootMethod> meetMethods) {
+    public static LeakIdentifier dealInterProcedureCall(Unit unit, Set<Value> localValuables, Set<SootMethod> meetMethods) {
         InvokeStmt invokeStmt = (InvokeStmt) unit;
         int argIndex = getInterProcedureParameterIndex(invokeStmt, localValuables);
         SootMethod invokeMethod = invokeStmt.getInvokeExpr().getMethod();
-        if (!invokeMethod.hasActiveBody()) return false;
+        if (!invokeMethod.hasActiveBody()) return NOT_LEAK;
         Body body = invokeMethod.getActiveBody();
         Unit startUnit = getStartUnit(body, argIndex);
         return ResourceLeakDetector.detect(startUnit, meetMethods);

@@ -1,6 +1,7 @@
 package cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis;
 
 import cn.edu.sustech.cse.sqlab.leakdroid.cmdparser.OptionsArgs;
+import cn.edu.sustech.cse.sqlab.leakdroid.entities.LeakIdentifier;
 import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.analyzer.PathAnalyzer;
 import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.pathextractor.CFGPath;
 import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.pathextractor.PathExtractor;
@@ -20,7 +21,7 @@ import java.util.Set;
 public class ResourceLeakDetector {
     private static final Logger logger = Logger.getLogger(ResourceLeakDetector.class);
 
-    public static boolean detect(Unit unit, Set<SootMethod> meetMethods) {
+    public static LeakIdentifier detect(Unit unit, Set<SootMethod> meetMethods) {
         PathExtractor extractor = new PathExtractor();
         PathAnalyzer analyzer = new PathAnalyzer(unit, meetMethods);
 
@@ -34,7 +35,7 @@ public class ResourceLeakDetector {
 
     }
 
-    public static boolean detect(Unit unit) {
+    public static LeakIdentifier detect(Unit unit) {
         return detect(unit, new HashSet<>());
     }
 
