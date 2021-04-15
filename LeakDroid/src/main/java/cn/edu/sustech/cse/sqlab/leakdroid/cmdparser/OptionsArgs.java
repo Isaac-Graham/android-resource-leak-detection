@@ -20,6 +20,7 @@ public class OptionsArgs {
     public static String androidLib;
     public static CommandLine cmdLine = OptionsParser.getCommandLine();
 
+    public static int timeLimit = 10;
     public static boolean isVerboseMode = true;
     public static boolean outputAllDot = false;
     public static boolean overrideOutputDir = false;

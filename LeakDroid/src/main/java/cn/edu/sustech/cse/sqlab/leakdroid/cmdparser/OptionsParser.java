@@ -6,6 +6,8 @@ import org.apache.log4j.Logger;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
 
+import static cn.edu.sustech.cse.sqlab.leakdroid.entities.Error.PARSE_ERROR;
+
 /**
  * @author Isaac Chen
  * @email ccccym666@gmail.com
@@ -73,11 +75,18 @@ public class OptionsParser {
                 .type(boolean.class)
                 .desc("Output all possible leak paths if plag set")
                 .build());
+        options.addOption(Option.builder(OptName.shortTimeLimit)
+                .longOpt(OptName.longTimeLimit)
+                .argName("time limit for analyzer (unit: s)")
+                .hasArg(true)
+                .type(int.class)
+                .desc("Time limit of analyzer for a single method (unit: s)")
+                .build());
         try {
             commandLine = commandLineParser.parse(options, args);
         } catch (ParseException e) {
             logger.error("Error occurs while parsing command line arguments.\n " + getHelpString());
-            System.exit(-1);
+            System.exit(PARSE_ERROR.errorCode);
         }
     }
 

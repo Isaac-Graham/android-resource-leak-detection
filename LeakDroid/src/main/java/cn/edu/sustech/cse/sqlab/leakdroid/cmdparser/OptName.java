@@ -20,4 +20,6 @@ public class OptName {
     public static final String longPackageOnly = "package-only";
     public static final String shortAllLeakPaths = "alp";
     public static final String longAllLeakPaths = "all-leak-paths";
+    public static final String shortTimeLimit = "tl";
+    public static final String longTimeLimit = "time-limit";
 }

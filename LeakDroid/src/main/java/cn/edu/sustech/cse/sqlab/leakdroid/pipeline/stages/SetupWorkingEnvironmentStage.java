@@ -34,6 +34,9 @@ public class SetupWorkingEnvironmentStage extends BaseStage {
         OptionsArgs.overrideOutputDir = cmdLine.hasOption(OptName.shortOverrideOutputDir);
         OptionsArgs.onlyPackage = cmdLine.hasOption(OptName.shortPackageOnly);
         OptionsArgs.outputAllLeakPaths = cmdLine.hasOption(OptName.shortAllLeakPaths);
+        if (cmdLine.hasOption(OptName.shortTimeLimit)) {
+            OptionsArgs.timeLimit = Integer.parseInt(cmdLine.getOptionValue(OptName.shortTimeLimit));
+        }
         initialInputFile();
         initialInputApkFileInfo();
         initialOutputDir();
