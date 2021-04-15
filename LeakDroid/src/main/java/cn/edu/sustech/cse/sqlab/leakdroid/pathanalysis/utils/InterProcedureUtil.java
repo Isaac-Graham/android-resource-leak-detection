@@ -1,6 +1,7 @@
 package cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.utils;
 
 import cn.edu.sustech.cse.sqlab.leakdroid.entities.LeakIdentifier;
+import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.ICFGContext;
 import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.ResourceLeakDetector;
 import org.apache.log4j.Logger;
 import soot.*;
@@ -54,13 +55,17 @@ public class InterProcedureUtil {
         InvokeStmt invokeStmt = (InvokeStmt) unit;
         int argIndex = getInterProcedureParameterIndex(invokeStmt, localValuables);
         SootMethod invokeMethod = invokeStmt.getInvokeExpr().getMethod();
-        if (!invokeMethod.hasActiveBody()) return NOT_LEAK;
-        Body body = invokeMethod.getActiveBody();
-        Unit startUnit = getStartUnit(body, argIndex);
-        return ResourceLeakDetector.detect(startUnit, meetMethods);
+        if (ICFGContext.getSootMethodArgLeakIdentifier(invokeMethod, argIndex) == null) {
+            if (!invokeMethod.hasActiveBody()) return NOT_LEAK;
+            Body body = invokeMethod.getActiveBody();
+            Unit startUnit = getStartUnit(body, argIndex);
+            LeakIdentifier identifier = ResourceLeakDetector.detect(startUnit, meetMethods);
+            ICFGContext.setSootMethodArgLeakIdentifier(invokeMethod, argIndex, identifier);
+        }
+        return ICFGContext.getSootMethodArgLeakIdentifier(invokeMethod, argIndex);
     }
 
-    public static Unit getStartUnit(Body body, int argIndex) {
+    private static Unit getStartUnit(Body body, int argIndex) {
         for (Unit unit : body.getUnits()) {
             if (unit instanceof JIdentityStmt) {
                 AbstractDefinitionStmt stmt = (AbstractDefinitionStmt) unit;

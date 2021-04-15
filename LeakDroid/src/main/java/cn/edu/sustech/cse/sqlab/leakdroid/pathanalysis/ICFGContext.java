@@ -1,8 +1,11 @@
 package cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis;
 
+import cn.edu.sustech.cse.sqlab.leakdroid.entities.LeakIdentifier;
+import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.utils.InterProcedureUtil;
 import cn.edu.sustech.cse.sqlab.leakdroid.tags.UnitMethodNameTag;
 import cn.edu.sustech.cse.sqlab.leakdroid.util.SootMethodUtil;
 import cn.edu.sustech.cse.sqlab.leakdroid.util.UnitUtil;
+import com.google.common.collect.Lists;
 import org.apache.log4j.Logger;
 import soot.*;
 import soot.jimple.toolkits.annotation.logic.Loop;
@@ -12,6 +15,10 @@ import soot.toolkits.graph.ExceptionalUnitGraph;
 import soot.util.Chain;
 
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static cn.edu.sustech.cse.sqlab.leakdroid.entities.LeakIdentifier.NOT_LEAK;
 
 /**
  * @author Isaac Chen
@@ -24,7 +31,7 @@ public class ICFGContext {
     private static final HashMap<SootMethod, ExceptionalUnitGraph> cfgGraphs = new HashMap<>();
     private static final HashMap<SootMethod, Set<Loop>> methodLoops = new HashMap<>();
     public static final Set<SootMethod> processingMethods = new HashSet<>();
-
+    public static final HashMap<SootMethod, List<LeakIdentifier>> methodArgsLeakCached = new HashMap<>();
 
     public static void addCFGFromMethod(SootMethod sootMethod) {
         if (cfgGraphs.containsKey(sootMethod)) return;
@@ -60,6 +67,32 @@ public class ICFGContext {
             addLoopFromMethod(sootMethod);
         }
         return methodLoops.get(sootMethod);
+    }
+
+    public static LeakIdentifier getSootMethodArgLeakIdentifier(SootMethod invokeMethod, int argIndex) {
+        if (!methodArgsLeakCached.containsKey(invokeMethod)) {
+            List<LeakIdentifier> list = new ArrayList<>(Collections.nCopies(invokeMethod.getParameterCount(), null));
+            methodArgsLeakCached.put(invokeMethod, list);
+        }
+//
+//        if (methodArgsLeakCached.get(invokeMethod).get(argIndex) == null) {
+//            LeakIdentifier argLeak = null;
+//            if (!invokeMethod.hasActiveBody()) {
+//                argLeak = NOT_LEAK;
+//            } else {
+//                Body body = invokeMethod.getActiveBody();
+//                Unit startUnit = InterProcedureUtil.getStartUnit(body, argIndex);
+//                argLeak = new ResourceLeakDetector.detect(startUnit)
+//            }
+//            methodArgsLeakCached.get(invokeMethod).set(argIndex, argLeak);
+//        }
+//
+        return methodArgsLeakCached.get(invokeMethod).get(argIndex);
+
+    }
+
+    public static void setSootMethodArgLeakIdentifier(SootMethod invokeMethod, int argIndex, LeakIdentifier identifier) {
+        methodArgsLeakCached.get(invokeMethod).set(argIndex, identifier);
     }
 
 }
