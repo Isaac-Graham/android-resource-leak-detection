@@ -2,14 +2,12 @@ package cn.edu.sustech.cse.sqlab.leakdroid.pipeline.stages;
 
 import cn.edu.sustech.cse.sqlab.leakdroid.tranformers.*;
 import cn.edu.sustech.cse.sqlab.leakdroid.util.PackManagerUtil;
-import com.google.common.collect.Lists;
 import org.apache.log4j.Logger;
 import soot.G;
 import cn.edu.sustech.cse.sqlab.leakdroid.cmdparser.OptionsArgs;
 import soot.PackManager;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Arrays;
 
 public class RunSootStage extends BaseStage {
@@ -70,7 +68,7 @@ public class RunSootStage extends BaseStage {
 
     private void addTransformers() {
         PackManagerUtil.addTransformation(PackManager.v(), new UnloadableBodiesEliminator());
-        PackManagerUtil.addTransformation(PackManager.v(), new ICFGGenerator());
+        PackManagerUtil.addTransformation(PackManager.v(), new ICFGPreparer());
         PackManagerUtil.addTransformation(PackManager.v(), new TestICFG());
         PackManagerUtil.addTransformation(PackManager.v(), new CFGDrawer());
 //        PackManagerUtil.addTransformation(PackManager.v(), new Test());

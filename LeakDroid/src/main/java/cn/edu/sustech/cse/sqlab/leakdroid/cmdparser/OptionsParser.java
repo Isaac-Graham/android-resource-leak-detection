@@ -49,28 +49,24 @@ public class OptionsParser {
                 .build());
         options.addOption(Option.builder(OptName.shortOverrideOutputDir)
                 .longOpt(OptName.longOverrideOutputDir)
-                .argName("override the output directory")
                 .hasArg(false)
                 .type(boolean.class)
                 .desc("Whether override the output directory or not")
                 .build());
         options.addOption(Option.builder(OptName.shortOutputAllDot)
                 .longOpt(OptName.longOutputAllDot)
-                .argName("output all dot")
                 .hasArg(false)
                 .type(boolean.class)
                 .desc("Whether output all dot file(containing those does not leak)")
                 .build());
         options.addOption(Option.builder(OptName.shortPackageOnly)
                 .longOpt(OptName.longPackageOnly)
-                .argName("only resource in package will be analyzed")
                 .hasArg(false)
                 .type(boolean.class)
                 .desc("Only the class in package will be analyzed if set")
                 .build());
         options.addOption(Option.builder(OptName.shortAllLeakPaths)
                 .longOpt(OptName.longAllLeakPaths)
-                .argName("output all possible leak paths")
                 .hasArg(false)
                 .type(boolean.class)
                 .desc("Output all possible leak paths if plag set")
@@ -81,6 +77,18 @@ public class OptionsParser {
                 .hasArg(true)
                 .type(int.class)
                 .desc("Time limit of analyzer for a single method (unit: s)")
+                .build());
+        options.addOption(Option.builder(OptName.shortOnlyLeakPath)
+                .longOpt(OptName.longOnlyLeakPath)
+                .hasArg(false)
+                .type(boolean.class)
+                .desc("Only output leak path if flag is set")
+                .build());
+        options.addOption(Option.builder(OptName.shortOnlyResourceMethod)
+                .longOpt(OptName.longOnlyResourceMethod)
+                .hasArg(false)
+                .type(boolean.class)
+                .desc("Only method with resource requested will be output if flag is set")
                 .build());
         try {
             commandLine = commandLineParser.parse(options, args);

@@ -34,12 +34,15 @@ public class PathAnalyzer {
         this.meetMethods.add(sootMethod);
     }
 
-    public LeakIdentifier analyze(List<CFGPath> paths) {
+    public LeakIdentifier analyze(List<CFGPath> paths, boolean interProcedural) {
         LeakIdentifier res = NOT_LEAK;
         for (CFGPath path : paths) {
             LeakIdentifier analyzeRes = this.analyze(path);
             res = LeakIdentifier.max(res, analyzeRes);
             if (analyzeRes == LEAK) {
+                if (interProcedural) {
+                    break;
+                }
                 PathAnalyzer.reportStackUnitInfo(path);
                 if (!OptionsArgs.outputAllLeakPaths) {
                     break;

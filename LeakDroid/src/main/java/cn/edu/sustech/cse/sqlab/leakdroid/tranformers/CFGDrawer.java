@@ -44,9 +44,11 @@ public class CFGDrawer extends BodyTransformer {
     protected void internalTransform(Body body, String s, Map<String, String> map) {
         if (SootClassUtil.isExclude(body.getMethod().getDeclaringClass())) return;
         if (body.getMethod().toString().contains(SootMethod.staticInitializerName)) return;
-//        if (true) {
-//            return;
-//        }
+        if (true) {
+            return;
+        }
+        if (ICFGContext.getMethodLeakIdentifier(body.getMethod()) == NO_RESOURCES && OptionsArgs.onlyResourceMethod)
+            return;
 
 //        if (!SootMethodUtil.getFullName(body.getMethod()).contains("org.sufficientlysecure.keychain.keyimport.HkpKeyserver.add"))
 //            return;
@@ -57,13 +59,16 @@ public class CFGDrawer extends BodyTransformer {
     private static DotGraph generateDotGraphPlanA(Body body) {
         ExceptionalUnitGraph cfg = ICFGContext.getCFGFromMethod(body.getMethod());
         DotGraph dotGraph = new DotGraph(String.format("CFG of %s", SootMethodUtil.getFullName(body.getMethod())));
+        dotGraph.setGraphLabel(SootMethodUtil.getFullName(body.getMethod()));
+
         if (cfg == null) return dotGraph;
 
         body.getUnits().forEach(unit -> {
             if (unit.hasTag(ResourceLeakTag.name)) {
                 dotGraph.drawNode(getNodeName(unit)).setAttribute("color", "red");
             } else {
-                dotGraph.drawNode(getNodeName(unit)).setAttribute("color", "black");
+                if (!OptionsArgs.onlyLeakPath)
+                    dotGraph.drawNode(getNodeName(unit)).setAttribute("color", "black");
             }
             List<Unit> successors = cfg.getSuccsOf(unit);
             successors.forEach(successor -> {
@@ -71,7 +76,8 @@ public class CFGDrawer extends BodyTransformer {
                         && UnitUtil.getResourceLeakTag(unit).getSuccessors().contains(successor)) {
                     dotGraph.drawEdge(getNodeName(unit), getNodeName(successor)).setAttribute("color", "red");
                 } else {
-                    dotGraph.drawEdge(getNodeName(unit), getNodeName(successor)).setAttribute("color", "black");
+                    if (!OptionsArgs.onlyLeakPath)
+                        dotGraph.drawEdge(getNodeName(unit), getNodeName(successor)).setAttribute("color", "black");
                 }
             });
         });

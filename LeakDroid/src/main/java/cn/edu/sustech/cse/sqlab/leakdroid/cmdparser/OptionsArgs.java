@@ -26,6 +26,8 @@ public class OptionsArgs {
     public static boolean overrideOutputDir = false;
     public static boolean onlyPackage = false;
     public static boolean outputAllLeakPaths = false;
+    public static boolean onlyLeakPath = false;
+    public static boolean onlyResourceMethod = false;
     public static List<String> excludedPackageNames = Arrays.asList(
             "android.*",
             "androidx.*",

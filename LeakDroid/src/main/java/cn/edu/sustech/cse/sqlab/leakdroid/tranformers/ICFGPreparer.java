@@ -1,12 +1,10 @@
 package cn.edu.sustech.cse.sqlab.leakdroid.tranformers;
 
 import cn.edu.sustech.cse.sqlab.leakdroid.annotation.PhaseName;
-import cn.edu.sustech.cse.sqlab.leakdroid.tags.UnitMethodNameTag;
 import cn.edu.sustech.cse.sqlab.leakdroid.util.SootMethodUtil;
 import cn.edu.sustech.cse.sqlab.leakdroid.util.UnitUtil;
 import org.apache.log4j.Logger;
 import soot.*;
-import soot.util.Chain;
 
 import java.util.Map;
 
@@ -17,8 +15,8 @@ import java.util.Map;
  */
 
 @PhaseName(name = "wstp.icfg.drawer")
-public class ICFGGenerator extends SceneTransformer {
-    private final static Logger logger = Logger.getLogger(ICFGGenerator.class);
+public class ICFGPreparer extends SceneTransformer {
+    private final static Logger logger = Logger.getLogger(ICFGPreparer.class);
 
     @Override
     protected void internalTransform(String s, Map<String, String> map) {

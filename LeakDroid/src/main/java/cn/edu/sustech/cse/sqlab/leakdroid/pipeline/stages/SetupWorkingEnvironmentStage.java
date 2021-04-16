@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -34,6 +35,8 @@ public class SetupWorkingEnvironmentStage extends BaseStage {
         OptionsArgs.overrideOutputDir = cmdLine.hasOption(OptName.shortOverrideOutputDir);
         OptionsArgs.onlyPackage = cmdLine.hasOption(OptName.shortPackageOnly);
         OptionsArgs.outputAllLeakPaths = cmdLine.hasOption(OptName.shortAllLeakPaths);
+        OptionsArgs.onlyLeakPath = cmdLine.hasOption(OptName.shortOnlyLeakPath);
+        OptionsArgs.onlyResourceMethod = cmdLine.hasOption(OptName.shortOnlyResourceMethod);
         if (cmdLine.hasOption(OptName.shortTimeLimit)) {
             OptionsArgs.timeLimit = Integer.parseInt(cmdLine.getOptionValue(OptName.shortTimeLimit));
         }

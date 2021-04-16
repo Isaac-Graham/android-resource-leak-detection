@@ -24,7 +24,10 @@ public class ResourceLeakDetector {
     private static final Logger logger = Logger.getLogger(ResourceLeakDetector.class);
 
     public static LeakIdentifier detect(Unit unit, Set<SootMethod> meetMethods) {
-        return detect(Collections.singletonList(unit), UnitUtil.getBody(unit), meetMethods);
+        return detect(Collections.singletonList(unit),
+                UnitUtil.getBody(unit),
+                meetMethods,
+                true);
     }
 
 
@@ -33,10 +36,15 @@ public class ResourceLeakDetector {
                         .stream()
                         .filter(ResourceUtil::isRequest)
                         .collect(Collectors.toList()),
-                body, meetMethods);
+                body,
+                meetMethods,
+                false);
     }
 
-    private static LeakIdentifier detect(List<Unit> requestedUnits, Body body, Set<SootMethod> meetMethods) {
+    private static LeakIdentifier detect(List<Unit> requestedUnits,
+                                         Body body,
+                                         Set<SootMethod> meetMethods,
+                                         boolean interProcedural) {
         PathExtractor extractor = new PathExtractor();
         PathAnalyzer analyzer = new PathAnalyzer(body.getMethod(), meetMethods);
 
@@ -52,7 +60,7 @@ public class ResourceLeakDetector {
         });
         Collections.sort(paths);
 
-        return analyzer.analyze(paths);
+        return analyzer.analyze(paths, interProcedural);
     }
 
     private static class DaemonThread extends Thread {

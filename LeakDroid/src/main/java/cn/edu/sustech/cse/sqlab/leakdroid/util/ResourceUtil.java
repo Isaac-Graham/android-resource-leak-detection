@@ -38,6 +38,11 @@ public class ResourceUtil {
             java.io.OutputStream.class.getName(),
             java.io.OutputStreamWriter.class.getName(),
             java.io.PipedOutputStream.class.getName(),
+            // android.database.Cursor
+            // android.net.wifi.WifiManager.WifiLock
+            // android.os.PowerManager.WakeLock
+            // android.database.sqlite.SQLiteDatabase
+            // android.os.ParcelFileDescriptor
 
             // NET Resources
             java.net.Socket.class.getName(),

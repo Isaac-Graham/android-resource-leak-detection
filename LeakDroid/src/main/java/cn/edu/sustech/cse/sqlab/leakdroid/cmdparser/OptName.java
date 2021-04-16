@@ -22,4 +22,8 @@ public class OptName {
     public static final String longAllLeakPaths = "all-leak-paths";
     public static final String shortTimeLimit = "tl";
     public static final String longTimeLimit = "time-limit";
+    public static final String shortOnlyLeakPath = "olp";
+    public static final String longOnlyLeakPath = "only-leak-path";
+    public static final String shortOnlyResourceMethod = "orm";
+    public static final String longOnlyResourceMethod = "only-resource-method";
 }
