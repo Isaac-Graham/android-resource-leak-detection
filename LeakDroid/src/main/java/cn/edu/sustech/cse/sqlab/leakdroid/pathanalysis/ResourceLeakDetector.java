@@ -5,13 +5,15 @@ import cn.edu.sustech.cse.sqlab.leakdroid.entities.LeakIdentifier;
 import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.analyzer.PathAnalyzer;
 import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.pathextractor.CFGPath;
 import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.pathextractor.PathExtractor;
+import cn.edu.sustech.cse.sqlab.leakdroid.util.ResourceUtil;
+import cn.edu.sustech.cse.sqlab.leakdroid.util.UnitUtil;
 import org.apache.log4j.Logger;
+import soot.Body;
 import soot.SootMethod;
 import soot.Unit;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author Isaac Chen
@@ -22,21 +24,35 @@ public class ResourceLeakDetector {
     private static final Logger logger = Logger.getLogger(ResourceLeakDetector.class);
 
     public static LeakIdentifier detect(Unit unit, Set<SootMethod> meetMethods) {
+        return detect(Collections.singletonList(unit), UnitUtil.getBody(unit), meetMethods);
+    }
+
+
+    public static LeakIdentifier detect(Body body, Set<SootMethod> meetMethods) {
+        return detect(body.getUnits()
+                        .stream()
+                        .filter(ResourceUtil::isRequest)
+                        .collect(Collectors.toList()),
+                body, meetMethods);
+    }
+
+    private static LeakIdentifier detect(List<Unit> requestedUnits, Body body, Set<SootMethod> meetMethods) {
         PathExtractor extractor = new PathExtractor();
-        PathAnalyzer analyzer = new PathAnalyzer(unit, meetMethods);
+        PathAnalyzer analyzer = new PathAnalyzer(body.getMethod(), meetMethods);
 
 
         DaemonThread daemonThread = new DaemonThread(extractor, analyzer);
         daemonThread.setDaemon(true);
         daemonThread.start();
 
-        List<CFGPath> paths = extractor.extractPath(unit);
+
+        List<CFGPath> paths = new ArrayList<>();
+        requestedUnits.forEach(unit -> {
+            paths.addAll(extractor.extractPath(unit));
+        });
+        Collections.sort(paths);
+
         return analyzer.analyze(paths);
-
-    }
-
-    public static LeakIdentifier detect(Unit unit) {
-        return detect(unit, new HashSet<>());
     }
 
     private static class DaemonThread extends Thread {

@@ -17,8 +17,7 @@ import soot.shimple.PhiExpr;
 
 import java.util.*;
 
-import static cn.edu.sustech.cse.sqlab.leakdroid.entities.LeakIdentifier.NOT_LEAK;
-import static cn.edu.sustech.cse.sqlab.leakdroid.entities.LeakIdentifier.LEAK;
+import static cn.edu.sustech.cse.sqlab.leakdroid.entities.LeakIdentifier.*;
 
 /**
  * @author Isaac Chen
@@ -30,28 +29,24 @@ public class PathAnalyzer {
     private final Set<SootMethod> meetMethods;
     public boolean isEnd = false;
 
-    public PathAnalyzer(Unit startUnit, Set<SootMethod> meetMethods) {
+    public PathAnalyzer(SootMethod sootMethod, Set<SootMethod> meetMethods) {
         this.meetMethods = meetMethods;
-        initialMeetMethod(startUnit);
+        this.meetMethods.add(sootMethod);
     }
 
     public LeakIdentifier analyze(List<CFGPath> paths) {
         LeakIdentifier res = NOT_LEAK;
         for (CFGPath path : paths) {
-            if (this.analyze(path) == LEAK) {
+            LeakIdentifier analyzeRes = this.analyze(path);
+            res = LeakIdentifier.max(res, analyzeRes);
+            if (analyzeRes == LEAK) {
                 PathAnalyzer.reportStackUnitInfo(path);
-                res = LeakIdentifier.LEAK;
                 if (!OptionsArgs.outputAllLeakPaths) {
                     break;
                 }
             }
         }
         return res;
-    }
-
-    private void initialMeetMethod(Unit unit) {
-        SootMethod sootMethod = UnitUtil.getSootMethod(unit);
-        this.meetMethods.add(sootMethod);
     }
 
     private static void updateLocalVariable(Unit curUnit, List<Unit> curPath, Set<Value> localVariables) {
@@ -64,7 +59,7 @@ public class PathAnalyzer {
                     InvokeStmt invokeStmt = (InvokeStmt) curUnit;
                     for (Value arg : invokeStmt.getInvokeExpr().getArgs()) {
                         if (localVariables.contains(arg)) {
-                            logger.debug(UnitUtil.getInvokeBase(curUnit));
+                            local = UnitUtil.getInvokeBase(curUnit);
                         }
                     }
                 }
@@ -113,8 +108,7 @@ public class PathAnalyzer {
             }
             updateLocalVariable(curUnit, path.subList(0, i), localVariables);
         }
-
-        return LEAK;
+        return isEnd ? UN_KNOWN : LEAK;
     }
 
     private static void reportStackUnitInfo(CFGPath cfgPath) {

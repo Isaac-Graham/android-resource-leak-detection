@@ -1,5 +1,6 @@
 package cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.pathextractor;
 
+import org.jetbrains.annotations.NotNull;
 import soot.Unit;
 
 import java.util.List;
@@ -9,7 +10,7 @@ import java.util.List;
  * @email ccccym666@gmail.com
  * @date 2021/4/13 19:25
  */
-public class CFGPath {
+public class CFGPath implements Comparable<CFGPath> {
     final List<Unit> path;
 
     public CFGPath(List<Unit> path) {
@@ -26,5 +27,11 @@ public class CFGPath {
 
     public List<Unit> getPath() {
         return path;
+    }
+
+
+    @Override
+    public int compareTo(@NotNull CFGPath o) {
+        return this.path.size() - o.path.size();
     }
 }

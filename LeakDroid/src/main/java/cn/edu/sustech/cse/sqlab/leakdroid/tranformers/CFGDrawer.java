@@ -2,6 +2,7 @@ package cn.edu.sustech.cse.sqlab.leakdroid.tranformers;
 
 import cn.edu.sustech.cse.sqlab.leakdroid.annotation.PhaseName;
 import cn.edu.sustech.cse.sqlab.leakdroid.cmdparser.OptionsArgs;
+import cn.edu.sustech.cse.sqlab.leakdroid.entities.LeakIdentifier;
 import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.ICFGContext;
 import cn.edu.sustech.cse.sqlab.leakdroid.tags.ResourceLeakTag;
 import cn.edu.sustech.cse.sqlab.leakdroid.util.ResourceUtil;
@@ -22,6 +23,8 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.regex.Matcher;
 
+import static cn.edu.sustech.cse.sqlab.leakdroid.entities.LeakIdentifier.*;
+
 /**
  * @author Isaac Chen
  * @email ccccym666@gmail.com
@@ -33,18 +36,20 @@ public class CFGDrawer extends BodyTransformer {
     private final static Logger logger = Logger.getLogger(CFGDrawer.class);
     private static final String leakFolder = "leak";
     private static final String notLeakFolder = "not_leak";
+    private static final String unknownFolder = "unknown";
+    private static final String noResourcesFolder = "no_resources";
 
 
     @Override
     protected void internalTransform(Body body, String s, Map<String, String> map) {
         if (SootClassUtil.isExclude(body.getMethod().getDeclaringClass())) return;
         if (body.getMethod().toString().contains(SootMethod.staticInitializerName)) return;
-//        if (!SootMethodUtil.getFullName(body.getMethod()).contains("constraintResource"))
-//            return;
 //        if (true) {
 //            return;
 //        }
 
+//        if (!SootMethodUtil.getFullName(body.getMethod()).contains("org.sufficientlysecure.keychain.keyimport.HkpKeyserver.add"))
+//            return;
         DotGraph dotGraph = generateDotGraphPlanA(body);
         printDotGraph(body, dotGraph);
     }
@@ -80,17 +85,17 @@ public class CFGDrawer extends BodyTransformer {
 
     private static String getNodeName(Unit unit) {
         return unit.toString();
-//        return String.format("%s\n%s", unit.toString(), unit.getClass().toString());
     }
 
     private static void printDotGraph(Body body, DotGraph dotGraph) {
-        boolean leak = body.getUnits().stream().anyMatch(unit -> unit.hasTag(ResourceLeakTag.name));
-        if (!leak && !OptionsArgs.outputAllDot) {
+        LeakIdentifier leakIdentifier = ICFGContext.getMethodLeakIdentifier(body.getMethod());
+
+        if (leakIdentifier != LEAK && !OptionsArgs.outputAllDot) {
             logger.info(String.format("Skip drawing %s", SootMethodUtil.getFullName(body.getMethod())));
             return;
         }
         logger.info(String.format("Drawing CFG of %s method", SootMethodUtil.getFullName(body.getMethod())));
-        String baseFolder = leak ? leakFolder : notLeakFolder;
+        String baseFolder = getFolderFromLeakIdentifier(leakIdentifier);
         String packageName = SootMethodUtil.getFolderName(body.getMethod());
         Path path = Paths.get(OptionsArgs.outputDir.getAbsolutePath(),
                 baseFolder,
@@ -111,5 +116,12 @@ public class CFGDrawer extends BodyTransformer {
         ).toString());
 
         logger.info(String.format("CFG of %s method drawn", SootMethodUtil.getFullName(body.getMethod())));
+    }
+
+    private static String getFolderFromLeakIdentifier(LeakIdentifier identifier) {
+        if (identifier == LEAK) return leakFolder;
+        else if (identifier == NOT_LEAK) return notLeakFolder;
+        else if (identifier == NO_RESOURCES) return noResourcesFolder;
+        else return unknownFolder;
     }
 }

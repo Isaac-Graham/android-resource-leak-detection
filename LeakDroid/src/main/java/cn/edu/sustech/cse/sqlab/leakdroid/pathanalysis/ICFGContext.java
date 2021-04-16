@@ -32,6 +32,7 @@ public class ICFGContext {
     private static final HashMap<SootMethod, Set<Loop>> methodLoops = new HashMap<>();
     public static final Set<SootMethod> processingMethods = new HashSet<>();
     public static final HashMap<SootMethod, List<LeakIdentifier>> methodArgsLeakCached = new HashMap<>();
+    public static final HashMap<SootMethod, LeakIdentifier> methodLeakIdentify = new HashMap<>();
 
     public static void addCFGFromMethod(SootMethod sootMethod) {
         if (cfgGraphs.containsKey(sootMethod)) return;
@@ -74,19 +75,6 @@ public class ICFGContext {
             List<LeakIdentifier> list = new ArrayList<>(Collections.nCopies(invokeMethod.getParameterCount(), null));
             methodArgsLeakCached.put(invokeMethod, list);
         }
-//
-//        if (methodArgsLeakCached.get(invokeMethod).get(argIndex) == null) {
-//            LeakIdentifier argLeak = null;
-//            if (!invokeMethod.hasActiveBody()) {
-//                argLeak = NOT_LEAK;
-//            } else {
-//                Body body = invokeMethod.getActiveBody();
-//                Unit startUnit = InterProcedureUtil.getStartUnit(body, argIndex);
-//                argLeak = new ResourceLeakDetector.detect(startUnit)
-//            }
-//            methodArgsLeakCached.get(invokeMethod).set(argIndex, argLeak);
-//        }
-//
         return methodArgsLeakCached.get(invokeMethod).get(argIndex);
 
     }
@@ -95,4 +83,15 @@ public class ICFGContext {
         methodArgsLeakCached.get(invokeMethod).set(argIndex, identifier);
     }
 
+    public static LeakIdentifier getMethodLeakIdentifier(SootMethod method) {
+        if (!methodLeakIdentify.containsKey(method)) {
+            logger.warn(String.format("Fail to get leak result of method: %s", SootMethodUtil.getFullName(method)));
+            return null;
+        }
+        return methodLeakIdentify.get(method);
+    }
+
+    public static void SetMethodLeakIdentifier(SootMethod method, LeakIdentifier identifier) {
+        methodLeakIdentify.put(method, identifier);
+    }
 }

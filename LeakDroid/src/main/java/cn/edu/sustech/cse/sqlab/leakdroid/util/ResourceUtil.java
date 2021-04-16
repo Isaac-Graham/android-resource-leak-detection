@@ -20,12 +20,12 @@ import java.util.Set;
 public class ResourceUtil {
     private static final Logger logger = Logger.getLogger(ResourceUtil.class);
     private static final List<String> javaResourcesType = Arrays.asList(
-//            // IO Resources
+            // IO Resources
             java.io.BufferedOutputStream.class.getName(),
-//            java.io.BufferedReader.class.getName(),
-//            java.io.BufferedWriter.class.getName(),
-//            java.io.ByteArrayOutputStream.class.getName(),
-//            java.io.DataOutputStream.class.getName(),
+            java.io.BufferedReader.class.getName(),
+            java.io.BufferedWriter.class.getName(),
+            java.io.ByteArrayOutputStream.class.getName(),
+            java.io.DataOutputStream.class.getName(),
             java.io.FileInputStream.class.getName(),
             java.io.FileOutputStream.class.getName(),
             java.io.FilterInputStream.class.getName(),
