@@ -17,6 +17,7 @@ import soot.util.dot.DotGraph;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -44,9 +45,9 @@ public class CFGDrawer extends BodyTransformer {
     protected void internalTransform(Body body, String s, Map<String, String> map) {
         if (SootClassUtil.isExclude(body.getMethod().getDeclaringClass())) return;
         if (body.getMethod().toString().contains(SootMethod.staticInitializerName)) return;
-        if (true) {
-            return;
-        }
+//        if (true) {
+//            return;
+//        }
         if (ICFGContext.getMethodLeakIdentifier(body.getMethod()) == NO_RESOURCES && OptionsArgs.onlyResourceMethod)
             return;
 

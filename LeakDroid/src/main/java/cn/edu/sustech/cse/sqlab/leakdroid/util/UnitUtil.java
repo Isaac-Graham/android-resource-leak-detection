@@ -40,19 +40,6 @@ public class UnitUtil {
         return sootMethod.getActiveBody();
     }
 
-    public static void addMethodTag(Chain<SootClass> sootClasses) {
-        sootClasses.forEach(sootClass -> {
-            sootClass.getMethods().forEach(sootMethod -> {
-                if (!sootMethod.hasActiveBody()) return;
-                SootMethodUtil.ensureSSA(sootMethod);
-                SootMethodUtil.updateLocalName(sootMethod);
-                Body body = sootMethod.getActiveBody();
-                body.getUnits().forEach(unit -> {
-                    unit.addTag(new UnitMethodNameTag(sootMethod));
-                });
-            });
-        });
-    }
 
     public static ResourceLeakTag getResourceLeakTag(Unit unit) {
         if (!unit.hasTag(ResourceLeakTag.name)) return null;

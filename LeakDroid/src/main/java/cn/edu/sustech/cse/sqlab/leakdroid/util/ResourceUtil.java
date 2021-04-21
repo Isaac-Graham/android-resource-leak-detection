@@ -1,16 +1,10 @@
 package cn.edu.sustech.cse.sqlab.leakdroid.util;
 
 import org.apache.log4j.Logger;
-import soot.SootClass;
-import soot.Unit;
-import soot.Value;
-import soot.jimple.InstanceInvokeExpr;
-import soot.jimple.InvokeExpr;
-import soot.jimple.InvokeStmt;
+import soot.*;
+import soot.jimple.*;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author Isaac Chen
@@ -19,50 +13,71 @@ import java.util.Set;
  */
 public class ResourceUtil {
     private static final Logger logger = Logger.getLogger(ResourceUtil.class);
-    private static final List<String> javaResourcesType = Arrays.asList(
-            // IO Resources
-            java.io.BufferedOutputStream.class.getName(),
-            java.io.BufferedReader.class.getName(),
-            java.io.BufferedWriter.class.getName(),
-            java.io.ByteArrayOutputStream.class.getName(),
-            java.io.DataOutputStream.class.getName(),
-            java.io.FileInputStream.class.getName(),
-            java.io.FileOutputStream.class.getName(),
-            java.io.FilterInputStream.class.getName(),
-            java.io.FilterOutputStream.class.getName(),
-            java.io.InputStream.class.getName(),
-            java.io.InputStreamReader.class.getName(),
+    private static final Set<String> javaResourcesType = new HashSet<String>() {{
+        // IO Resources
+        add(java.io.BufferedOutputStream.class.getName());
+        add(java.io.BufferedReader.class.getName());
+        add(java.io.BufferedWriter.class.getName());
+        add(java.io.ByteArrayOutputStream.class.getName());
+        add(java.io.DataOutputStream.class.getName());
+        add(java.io.FileInputStream.class.getName());
+        add(java.io.FileOutputStream.class.getName());
+        add(java.io.FilterInputStream.class.getName());
+        add(java.io.FilterOutputStream.class.getName());
+        add(java.io.InputStream.class.getName());
+        add(java.io.InputStreamReader.class.getName());
+        add(java.io.ObjectInputStream.class.getName());
+        add(java.io.ObjectOutputStream.class.getName());
+        add(java.io.OutputStream.class.getName());
+        add(java.io.OutputStreamWriter.class.getName());
+        add(java.io.PipedOutputStream.class.getName());
 
-            java.io.ObjectInputStream.class.getName(),
-            java.io.ObjectOutputStream.class.getName(),
-            java.io.OutputStream.class.getName(),
-            java.io.OutputStreamWriter.class.getName(),
-            java.io.PipedOutputStream.class.getName(),
-            // android.database.Cursor
-            // android.net.wifi.WifiManager.WifiLock
-            // android.os.PowerManager.WakeLock
-            // android.database.sqlite.SQLiteDatabase
-            // android.os.ParcelFileDescriptor
+        // NET Resources
+        add(java.net.Socket.class.getName());
 
-            // NET Resources
-            java.net.Socket.class.getName(),
+        // UTIL Resources
+        add(java.util.Formatter.class.getName());
+        add(java.util.Scanner.class.getName());
+        add(java.util.concurrent.Semaphore.class.getName());
+        add(java.util.logging.FileHandler.class.getName());
 
-            // UTIL Resources
-            java.util.Formatter.class.getName(),
-            java.util.Scanner.class.getName(),
-            java.util.concurrent.Semaphore.class.getName(),
-            java.util.logging.FileHandler.class.getName()
-    );
+        // ANDROID Resources
+        add("android.database.Cursor");
+        add("android.net.wifi.WifiManager.WifiLock");
+        add("android.os.PowerManager.WakeLock");
+        add("android.database.sqlite.SQLiteDatabase");
+        add("android.os.ParcelFileDescriptor");
+    }};
+    private static final HashMap<String, Set<SootMethod>> resourceRequestMethods = new HashMap<>();
+    private static final Set<SootMethod> containsResourceMethods = new HashSet<>();
 
     // TODO: 完善该方法
     public static boolean isRequest(Unit unit) {
+        InvokeExpr expr = null;
         if (unit instanceof InvokeStmt) {
             InvokeStmt invokeStmt = (InvokeStmt) unit;
-            if (invokeStmt.getInvokeExpr().getMethod().isConstructor()) {
-                return isJavaResource(invokeStmt);
-            }
+            expr = invokeStmt.getInvokeExpr();
+        } else if (unit instanceof DefinitionStmt) {
+            Value rightOp = UnitUtil.getDefineOp(unit, UnitUtil.rightOp);
+            if (!(rightOp instanceof InvokeExpr)) return false;
+            expr = (InvokeExpr) rightOp;
         }
-        return false;
+//        if (unit instanceof InvokeStmt) {
+//            InvokeStmt invokeStmt = (InvokeStmt) unit;
+//            if (invokeStmt.getInvokeExpr().getMethod().isConstructor()) {
+//                return isJavaResource(invokeStmt);
+//            }
+//        }
+        return isValidRequestInvoke(expr)
+                && getAllRequestMethods().contains(expr.getMethod());
+    }
+
+    private static boolean isValidRequestInvoke(InvokeExpr invokeExpr) {
+        if (invokeExpr == null) return false;
+        SootMethod sootMethod = invokeExpr.getMethod();
+        return sootMethod.isStatic()
+                || !sootMethod.getDeclaringClass().getName().contains("java.net")
+                || !sootMethod.getReturnType().toQuotedString().contains("java.io");
     }
 
     // TODO: 完善该方法
@@ -78,8 +93,36 @@ public class ResourceUtil {
         return false;
     }
 
+
     public static boolean isJavaResource(InvokeStmt invokeStmt) {
         SootClass sootClass = invokeStmt.getInvokeExpr().getMethod().getDeclaringClass();
         return javaResourcesType.stream().anyMatch(resourceType -> resourceType.equals(sootClass.getName()));
+    }
+
+    public static boolean isResource(Type type) {
+        return javaResourcesType.contains(type.toQuotedString());
+    }
+
+    public static void addRequestMethod(Type resource, SootMethod sootMethod) {
+        if (!resourceRequestMethods.containsKey(resource.toQuotedString())) {
+            resourceRequestMethods.put(resource.toQuotedString(), new HashSet<>());
+        }
+        resourceRequestMethods.get(resource.toQuotedString()).add(sootMethod);
+    }
+
+    public static Set<SootMethod> getAllRequestMethods() {
+        Set<SootMethod> res = new HashSet<>();
+        resourceRequestMethods.forEach((resourceType, requestMethod) -> {
+            res.addAll(requestMethod);
+        });
+        return res;
+    }
+
+    public static Set<SootMethod> getMethodContainingResource() {
+        return containsResourceMethods;
+    }
+
+    public static void addMethodContainingResource(SootMethod method) {
+        containsResourceMethods.add(method);
     }
 }
