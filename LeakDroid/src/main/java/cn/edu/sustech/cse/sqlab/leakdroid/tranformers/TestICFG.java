@@ -36,26 +36,11 @@ public class TestICFG extends BodyTransformer {
         if (SootClassUtil.isExclude(body.getMethod().getDeclaringClass())) return;
         if (body.getMethod().toString().contains(SootMethod.staticInitializerName)) return;
 
-//        if (!SootMethodUtil.getFullName(body.getMethod()).contains("com.irccloud.android.GingerbreadImageProxy.run"))
+//        if (!SootMethodUtil.getFullName(body.getMethod()).contains("org.geometerplus.zlibrary.core.encodings.FilteredEncodingCollection.<init>"))
 //            return;
         if (!ResourceUtil.getMethodContainingResource().contains(body.getMethod())) return;
         if (ResourceUtil.getAllRequestMethods().contains(body.getMethod())) return;
-//        ResourceUtil.getAllRequestMethods().forEach(logger::info);
-//        if (list.isEmpty()) {
-//            logger.info(SootMethodUtil.getFullName(body.getMethod()));
-//            body.getUnits().forEach(ResourceUtil::isRequest);
-//        }
-//        body.getUnits().forEach(unit -> {
-//            if (unit.toString().contains("createSocket")) {
-//                logger.info(unit);
-//            }
-//        });
-//        logger.info(SootMethodUtil.getFullName(body.getMethod()));
 
-//        if (body.getUnits().stream().noneMatch(ResourceUtil::isRequest)) {
-//            logger.info(String.format("No resource requested in method: %s. Break", SootMethodUtil.getFullName(body.getMethod())));
-//            res = NO_RESOURCES;
-//        } else {
         logger.info(String.format("Start to analyze method: %s", SootMethodUtil.getFullName(body.getMethod())));
 
         LeakIdentifier res = ResourceLeakDetector.detect(body, new HashSet<>());

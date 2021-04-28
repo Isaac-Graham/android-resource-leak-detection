@@ -62,12 +62,6 @@ public class ResourceUtil {
             if (!(rightOp instanceof InvokeExpr)) return false;
             expr = (InvokeExpr) rightOp;
         }
-//        if (unit instanceof InvokeStmt) {
-//            InvokeStmt invokeStmt = (InvokeStmt) unit;
-//            if (invokeStmt.getInvokeExpr().getMethod().isConstructor()) {
-//                return isJavaResource(invokeStmt);
-//            }
-//        }
         return isValidRequestInvoke(expr)
                 && getAllRequestMethods().contains(expr.getMethod());
     }

@@ -27,11 +27,13 @@ import static cn.edu.sustech.cse.sqlab.leakdroid.entities.LeakIdentifier.*;
 public class PathAnalyzer {
     private static final Logger logger = Logger.getLogger(PathAnalyzer.class);
     private final Set<SootMethod> meetMethods;
+    private final Set<Value> fieldValues;
     public boolean isEnd = false;
 
-    public PathAnalyzer(SootMethod sootMethod, Set<SootMethod> meetMethods) {
+    public PathAnalyzer(SootMethod sootMethod, Set<SootMethod> meetMethods, Set<Value> fieldValues) {
         this.meetMethods = meetMethods;
         this.meetMethods.add(sootMethod);
+        this.fieldValues = fieldValues;
     }
 
     public LeakIdentifier analyze(List<CFGPath> paths, boolean interProcedural) {
@@ -52,26 +54,25 @@ public class PathAnalyzer {
         return res;
     }
 
-    private static void updateLocalVariable(Unit curUnit, List<Unit> curPath, Set<Value> localVariables) {
+    private void updateLocalVariable(Unit curUnit, List<Unit> curPath, Set<Value> localVariables) {
         Value local = null;
-        if (curUnit instanceof InvokeStmt) {
-            if (ResourceUtil.isRequest(curUnit)) {
-                if (localVariables.isEmpty()) {
+
+        if (curUnit instanceof InvokeStmt && ResourceUtil.isRequest(curUnit)) {
+            if (localVariables.isEmpty()) local = UnitUtil.getInvokeBase(curUnit);
+        } else if (curUnit instanceof InvokeStmt && !ResourceUtil.isRequest(curUnit)) {
+            InvokeStmt invokeStmt = (InvokeStmt) curUnit;
+            for (Value arg : invokeStmt.getInvokeExpr().getArgs()) {
+                if (localVariables.contains(arg)) {
                     local = UnitUtil.getInvokeBase(curUnit);
-                } else {
-                    InvokeStmt invokeStmt = (InvokeStmt) curUnit;
-                    for (Value arg : invokeStmt.getInvokeExpr().getArgs()) {
-                        if (localVariables.contains(arg)) {
-                            local = UnitUtil.getInvokeBase(curUnit);
-                        }
-                    }
                 }
             }
-        } else if (curUnit instanceof DefinitionStmt) {
-            if (UnitUtil.getDefineOp(curUnit, UnitUtil.rightOp) instanceof ParameterRef) {
+        } else if (curUnit instanceof DefinitionStmt && ResourceUtil.isRequest(curUnit)) {
+            local = UnitUtil.getDefineOp(curUnit, UnitUtil.leftOp);
+        } else if (curUnit instanceof DefinitionStmt && !ResourceUtil.isRequest(curUnit)) {
+            Value rightOp = UnitUtil.getDefineOp(curUnit, UnitUtil.rightOp);
+            if (rightOp instanceof ParameterRef) {
                 local = UnitUtil.getDefineOp(curUnit, UnitUtil.leftOp);
             } else {
-                Value rightOp = UnitUtil.getDefineOp(curUnit, UnitUtil.rightOp);
                 if (rightOp instanceof PhiExpr) {
                     rightOp = UnitUtil.getPhiValue(rightOp, curPath);
                 }
@@ -80,7 +81,7 @@ public class PathAnalyzer {
                 }
             }
         }
-        if (local != null) {
+        if (local != null && !fieldValues.contains(local)) {
             localVariables.add(local);
         }
     }
@@ -90,6 +91,7 @@ public class PathAnalyzer {
         List<Unit> path = cfgPath.getPath();
         if (path.isEmpty()) return NOT_LEAK;
         updateLocalVariable(path.get(0), Collections.emptyList(), localVariables);
+        if (localVariables.isEmpty()) return NOT_LEAK;
 
         for (int i = 1; i < path.size() && !isEnd; i++) {
             Unit curUnit = path.get(i);
@@ -135,7 +137,6 @@ public class PathAnalyzer {
         logger.info(String.format("Resource leak method: %s\n" +
                 "\tResource leak path: %s", SootMethodUtil.getFullName(leakMethod), res));
     }
-
 
     private static boolean branchReachable(Set<Value> localValuables, IfStmt ifStmt, Unit nextUnit) {
         final String equal = "==";

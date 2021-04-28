@@ -90,6 +90,12 @@ public class OptionsParser {
                 .type(boolean.class)
                 .desc("Only method with resource requested will be output if flag is set")
                 .build());
+        options.addOption(Option.builder(OptName.shortDebugMode)
+                .longOpt(OptName.longDebugMode)
+                .hasArg(false)
+                .type(boolean.class)
+                .desc("Debug mode is turned on if flag is set")
+                .build());
         try {
             commandLine = commandLineParser.parse(options, args);
         } catch (ParseException e) {

@@ -26,4 +26,6 @@ public class OptName {
     public static final String longOnlyLeakPath = "only-leak-path";
     public static final String shortOnlyResourceMethod = "orm";
     public static final String longOnlyResourceMethod = "only-resource-method";
+    public static final String shortDebugMode = "d";
+    public static final String longDebugMode = "debug";
 }

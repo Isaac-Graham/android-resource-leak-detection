@@ -32,11 +32,12 @@ public class SetupWorkingEnvironmentStage extends BaseStage {
     @Override
     public void run() {
         OptionsArgs.outputAllDot = cmdLine.hasOption(OptName.shortOutputAllDot);
-        OptionsArgs.overrideOutputDir = cmdLine.hasOption(OptName.shortOverrideOutputDir);
+        OptionsArgs.overrideOutputDir = cmdLine.hasOption(OptName.shortOverrideOutputDir) && !cmdLine.hasOption(OptName.shortDebugMode);
         OptionsArgs.onlyPackage = cmdLine.hasOption(OptName.shortPackageOnly);
         OptionsArgs.outputAllLeakPaths = cmdLine.hasOption(OptName.shortAllLeakPaths);
         OptionsArgs.onlyLeakPath = cmdLine.hasOption(OptName.shortOnlyLeakPath);
         OptionsArgs.onlyResourceMethod = cmdLine.hasOption(OptName.shortOnlyResourceMethod);
+        OptionsArgs.debugMode = cmdLine.hasOption(OptName.shortDebugMode);
         if (cmdLine.hasOption(OptName.shortTimeLimit)) {
             OptionsArgs.timeLimit = Integer.parseInt(cmdLine.getOptionValue(OptName.shortTimeLimit));
         }
@@ -78,14 +79,10 @@ public class SetupWorkingEnvironmentStage extends BaseStage {
         if (OptionsArgs.inputApkFileInfo == null) {
             throw new ParseOptionsException("Error occurs: Apk file info not found");
         }
-        String pkgName = "defult package name";
-        try {
-            pkgName = OptionsArgs.inputApkFileInfo.getApkMeta().getPackageName();
-        } catch (IOException e) {
-            logger.warn("Fail to get apk meta data");
-        }
+        String fileName = OptionsArgs.inputApkFile.getName();
+        String directoryName = fileName.substring(0, fileName.lastIndexOf("."));
         String outputDirPath = cmdLine.hasOption(OptName.shortOutputDir) ?
-                String.format("%s/%s", cmdLine.getOptionValue(OptName.shortOutputDir), pkgName) : "./output/ssaOutput";
+                String.format("%s/%s", cmdLine.getOptionValue(OptName.shortOutputDir), directoryName) : "./output/ssaOutput";
         OptionsArgs.outputDir = new File(outputDirPath);
         if (!OptionsArgs.outputDir.exists()) {
             OptionsArgs.outputDir.mkdirs();
@@ -179,6 +176,10 @@ public class SetupWorkingEnvironmentStage extends BaseStage {
             }
             try {
                 String packageName = OptionsArgs.inputApkFileInfo.getApkMeta().getPackageName();
+                String[] packages = packageName.split("\\.");
+                if (packages.length > 2) {
+                    packageName = String.format("%s.%s", packages[0], packages[1]);
+                }
                 OptionsArgs.includedPackageNames.add(String.format("%s.*", packageName));
             } catch (IOException e) {
                 throw new ParseOptionsException("Fail to parse apk meta data");

@@ -1,7 +1,9 @@
 package cn.edu.sustech.cse.sqlab.leakdroid.pipeline.stages;
 
+import cn.edu.sustech.cse.sqlab.leakdroid.cmdparser.OptionsArgs;
 import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.ICFGContext;
 import cn.edu.sustech.cse.sqlab.leakdroid.util.SootMethodUtil;
+import com.googlecode.d2j.reader.Op;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
@@ -22,6 +24,19 @@ public class CleanUpStage extends BaseStage {
             sb.append(SootMethodUtil.getFullName(method)).append("\n");
         });
         logger.info(sb.toString());
+        removeJarFile();
+    }
+
+    private static void removeJarFile() {
+        if (OptionsArgs.convertedJarFile != null
+                && OptionsArgs.convertedJarFile.exists()
+                && !OptionsArgs.debugMode) {
+            if (OptionsArgs.convertedJarFile.delete()) {
+                logger.info("Successfully delete converted jar file");
+            } else {
+                logger.error(String.format("Fail to delete converted jar file. Please remove it manually: %s", OptionsArgs.convertedJarFile.getAbsolutePath()));
+            }
+        }
     }
 
     @Override

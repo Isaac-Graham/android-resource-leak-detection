@@ -45,9 +45,9 @@ public class CFGDrawer extends BodyTransformer {
     protected void internalTransform(Body body, String s, Map<String, String> map) {
         if (SootClassUtil.isExclude(body.getMethod().getDeclaringClass())) return;
         if (body.getMethod().toString().contains(SootMethod.staticInitializerName)) return;
-//        if (true) {
-//            return;
-//        }
+        if (OptionsArgs.debugMode) {
+            return;
+        }
         if (ICFGContext.getMethodLeakIdentifier(body.getMethod()) == NO_RESOURCES && OptionsArgs.onlyResourceMethod)
             return;
 

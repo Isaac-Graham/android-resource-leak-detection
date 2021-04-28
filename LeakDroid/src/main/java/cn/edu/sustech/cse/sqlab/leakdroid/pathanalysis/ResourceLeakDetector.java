@@ -11,6 +11,9 @@ import org.apache.log4j.Logger;
 import soot.Body;
 import soot.SootMethod;
 import soot.Unit;
+import soot.Value;
+import soot.jimple.DefinitionStmt;
+import soot.jimple.ThisRef;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -45,9 +48,9 @@ public class ResourceLeakDetector {
                                          Body body,
                                          Set<SootMethod> meetMethods,
                                          boolean interProcedural) {
+        Set<Value> fieldValues = getFieldValue(body);
         PathExtractor extractor = new PathExtractor();
-        PathAnalyzer analyzer = new PathAnalyzer(body.getMethod(), meetMethods);
-
+        PathAnalyzer analyzer = new PathAnalyzer(body.getMethod(), meetMethods, fieldValues);
 
         DaemonThread daemonThread = new DaemonThread(extractor, analyzer);
         daemonThread.setDaemon(true);
@@ -61,6 +64,18 @@ public class ResourceLeakDetector {
         Collections.sort(paths);
 
         return analyzer.analyze(paths, interProcedural);
+    }
+
+    private static Set<Value> getFieldValue(Body body) {
+        Set<Value> fieldValues = new HashSet<>();
+        body.getUnits().forEach(unit -> {
+            if (!(unit instanceof DefinitionStmt)) return;
+            Value rightOp = UnitUtil.getDefineOp(unit, UnitUtil.rightOp);
+            if (rightOp instanceof ThisRef || fieldValues.contains(rightOp)) {
+                fieldValues.add(UnitUtil.getDefineOp(unit, UnitUtil.leftOp));
+            }
+        });
+        return fieldValues;
     }
 
     private static class DaemonThread extends Thread {

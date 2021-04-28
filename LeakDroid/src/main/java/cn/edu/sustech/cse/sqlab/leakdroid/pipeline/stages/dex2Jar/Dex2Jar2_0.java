@@ -21,7 +21,8 @@ public class Dex2Jar2_0 extends Dex2Jar {
 
     @Override
     public File convert2Jar(File apkFile, File outputFolder) throws IOException {
-        File outputJarFile = Paths.get(outputFolder.getAbsolutePath(), String.format("%s_d2j.jar", apkFile.getName())).toFile();
+        File outputJarFile = Paths.get(outputFolder.getAbsolutePath(),
+                String.format("%s_d2j.jar", apkFile.getName().substring(0, apkFile.getName().lastIndexOf('.')))).toFile();
         DexFileReader reader = new DexFileReader(ZipUtil.readDex(apkFile));
         BaksmaliBaseDexExceptionHandler exceptionHandler = new BaksmaliBaseDexExceptionHandler();
         Dex2jar.from(reader)
