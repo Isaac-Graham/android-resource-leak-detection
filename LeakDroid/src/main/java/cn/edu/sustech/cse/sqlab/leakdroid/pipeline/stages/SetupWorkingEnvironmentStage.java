@@ -33,7 +33,9 @@ public class SetupWorkingEnvironmentStage extends BaseStage {
     public void run() {
         OptionsArgs.outputAllDot = cmdLine.hasOption(OptName.shortOutputAllDot);
         OptionsArgs.overrideOutputDir = cmdLine.hasOption(OptName.shortOverrideOutputDir) && !cmdLine.hasOption(OptName.shortDebugMode);
-        OptionsArgs.onlyPackage = cmdLine.hasOption(OptName.shortPackageOnly);
+        OptionsArgs.onlyPackageStrong = cmdLine.hasOption(OptName.shortStrongPackageOnly);
+        OptionsArgs.onlyPackageWeak = cmdLine.hasOption(OptName.shortWeakPackageOnly);
+        OptionsArgs.onlyPackage = OptionsArgs.onlyPackageStrong || OptionsArgs.onlyPackageWeak;
         OptionsArgs.outputAllLeakPaths = cmdLine.hasOption(OptName.shortAllLeakPaths);
         OptionsArgs.onlyLeakPath = cmdLine.hasOption(OptName.shortOnlyLeakPath);
         OptionsArgs.onlyResourceMethod = cmdLine.hasOption(OptName.shortOnlyResourceMethod);
@@ -170,15 +172,17 @@ public class SetupWorkingEnvironmentStage extends BaseStage {
     }
 
     private static void initialIncludedPackageNames() {
-        if (cmdLine.hasOption(OptName.shortPackageOnly)) {
+        if (OptionsArgs.onlyPackage) {
             if (OptionsArgs.inputApkFileInfo == null) {
                 throw new ParseOptionsException("Apk info has not been parsed");
             }
             try {
                 String packageName = OptionsArgs.inputApkFileInfo.getApkMeta().getPackageName();
-                String[] packages = packageName.split("\\.");
-                if (packages.length > 2) {
-                    packageName = String.format("%s.%s", packages[0], packages[1]);
+                if (OptionsArgs.onlyPackageWeak) {
+                    String[] packages = packageName.split("\\.");
+                    if (packages.length > 2) {
+                        packageName = String.format("%s.%s", packages[0], packages[1]);
+                    }
                 }
                 OptionsArgs.includedPackageNames.add(String.format("%s.*", packageName));
             } catch (IOException e) {

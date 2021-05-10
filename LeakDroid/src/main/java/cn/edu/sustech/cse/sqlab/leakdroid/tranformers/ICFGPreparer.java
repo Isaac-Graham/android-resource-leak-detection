@@ -45,8 +45,7 @@ public class ICFGPreparer extends SceneTransformer {
             sootClass.getMethods().forEach(sootMethod -> {
                 if (ResourceUtil.isResource(sootMethod.getReturnType())) {
                     ResourceUtil.addRequestMethod(sootMethod.getReturnType(), sootMethod);
-                }
-                if (sootMethod.isConstructor() && ResourceUtil.isResource(sootClass.getType())) {
+                } else if (sootMethod.isConstructor() && ResourceUtil.isResource(sootClass.getType())) {
                     ResourceUtil.addRequestMethod(sootMethod.getReturnType(), sootMethod);
                 }
             });

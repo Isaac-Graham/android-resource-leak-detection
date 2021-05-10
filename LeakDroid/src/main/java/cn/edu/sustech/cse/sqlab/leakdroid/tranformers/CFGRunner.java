@@ -4,20 +4,14 @@ import cn.edu.sustech.cse.sqlab.leakdroid.annotation.PhaseName;
 import cn.edu.sustech.cse.sqlab.leakdroid.entities.LeakIdentifier;
 import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.ICFGContext;
 import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.ResourceLeakDetector;
-import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.pathextractor.CFGPath;
-import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.pathextractor.PathExtractor;
 import cn.edu.sustech.cse.sqlab.leakdroid.util.ResourceUtil;
 import cn.edu.sustech.cse.sqlab.leakdroid.util.SootClassUtil;
 import cn.edu.sustech.cse.sqlab.leakdroid.util.SootMethodUtil;
-import com.google.common.collect.Lists;
 import org.apache.log4j.Logger;
 import soot.*;
-import soot.toolkits.graph.ExceptionalUnitGraph;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
-import static cn.edu.sustech.cse.sqlab.leakdroid.entities.LeakIdentifier.NOT_LEAK;
 import static cn.edu.sustech.cse.sqlab.leakdroid.entities.LeakIdentifier.NO_RESOURCES;
 
 /**
@@ -26,8 +20,8 @@ import static cn.edu.sustech.cse.sqlab.leakdroid.entities.LeakIdentifier.NO_RESO
  * @date 2021/2/18 22:19
  */
 @PhaseName(name = "stp.testicfg")
-public class TestICFG extends BodyTransformer {
-    private final static Logger logger = Logger.getLogger(TestICFG.class);
+public class CFGRunner extends BodyTransformer {
+    private final static Logger logger = Logger.getLogger(CFGRunner.class);
 
 
     @Override
@@ -35,11 +29,15 @@ public class TestICFG extends BodyTransformer {
         ICFGContext.SetMethodLeakIdentifier(body.getMethod(), NO_RESOURCES);
         if (SootClassUtil.isExclude(body.getMethod().getDeclaringClass())) return;
         if (body.getMethod().toString().contains(SootMethod.staticInitializerName)) return;
-
-//        if (!SootMethodUtil.getFullName(body.getMethod()).contains("org.geometerplus.zlibrary.core.encodings.FilteredEncodingCollection.<init>"))
-//            return;
         if (!ResourceUtil.getMethodContainingResource().contains(body.getMethod())) return;
         if (ResourceUtil.getAllRequestMethods().contains(body.getMethod())) return;
+//        if (true)return;
+//        if (!SootMethodUtil.getFullName(body.getMethod()).contains("org.sufficientlysecure.keychain.util.FileHelper.isEncryptedFile")) return;
+//        ICFGContext.getCFGFromMethod(body.getMethod()).getTails().forEach(
+//                unit -> logger.info(unit.getClass())
+//        );
+//        if (!ResourceUtil.getMethodContainingResource().contains(body.getMethod())) return;
+//        if (ResourceUtil.getAllRequestMethods().contains(body.getMethod())) return;
 
         logger.info(String.format("Start to analyze method: %s", SootMethodUtil.getFullName(body.getMethod())));
 

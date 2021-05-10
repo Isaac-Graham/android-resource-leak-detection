@@ -45,14 +45,13 @@ public class CFGDrawer extends BodyTransformer {
     protected void internalTransform(Body body, String s, Map<String, String> map) {
         if (SootClassUtil.isExclude(body.getMethod().getDeclaringClass())) return;
         if (body.getMethod().toString().contains(SootMethod.staticInitializerName)) return;
-        if (OptionsArgs.debugMode) {
-            return;
-        }
+//        if (OptionsArgs.debugMode) {
+//            return;
+//        }
+
         if (ICFGContext.getMethodLeakIdentifier(body.getMethod()) == NO_RESOURCES && OptionsArgs.onlyResourceMethod)
             return;
-
-//        if (!SootMethodUtil.getFullName(body.getMethod()).contains("org.sufficientlysecure.keychain.keyimport.HkpKeyserver.add"))
-//            return;
+//        if (!SootMethodUtil.getFullName(body.getMethod()).contains("org.sufficientlysecure.keychain.util.FileHelper.isEncryptedFile")) return;
         DotGraph dotGraph = generateDotGraphPlanA(body);
         printDotGraph(body, dotGraph);
     }

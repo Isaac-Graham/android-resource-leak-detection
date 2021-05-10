@@ -59,11 +59,17 @@ public class OptionsParser {
                 .type(boolean.class)
                 .desc("Whether output all dot file(containing those does not leak)")
                 .build());
-        options.addOption(Option.builder(OptName.shortPackageOnly)
-                .longOpt(OptName.longPackageOnly)
+        options.addOption(Option.builder(OptName.shortStrongPackageOnly)
+                .longOpt(OptName.longStrongPackageOnly)
                 .hasArg(false)
                 .type(boolean.class)
-                .desc("Only the class in package will be analyzed if set")
+                .desc("Only the class in package will be analyzed if set (Strong version)")
+                .build());
+        options.addOption(Option.builder(OptName.shortWeakPackageOnly)
+                .longOpt(OptName.longWeakPackageOnly)
+                .hasArg(false)
+                .type(boolean.class)
+                .desc("Only the class in package will be analyzed if set (Weak version)")
                 .build());
         options.addOption(Option.builder(OptName.shortAllLeakPaths)
                 .longOpt(OptName.longAllLeakPaths)

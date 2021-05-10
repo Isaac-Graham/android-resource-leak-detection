@@ -59,11 +59,12 @@ public class PathAnalyzer {
 
         if (curUnit instanceof InvokeStmt && ResourceUtil.isRequest(curUnit)) {
             if (localVariables.isEmpty()) local = UnitUtil.getInvokeBase(curUnit);
-        } else if (curUnit instanceof InvokeStmt && !ResourceUtil.isRequest(curUnit)) {
-            InvokeStmt invokeStmt = (InvokeStmt) curUnit;
-            for (Value arg : invokeStmt.getInvokeExpr().getArgs()) {
-                if (localVariables.contains(arg)) {
-                    local = UnitUtil.getInvokeBase(curUnit);
+            else {
+                InvokeStmt invokeStmt = (InvokeStmt) curUnit;
+                for (Value arg : invokeStmt.getInvokeExpr().getArgs()) {
+                    if (localVariables.contains(arg)) {
+                        local = UnitUtil.getInvokeBase(curUnit);
+                    }
                 }
             }
         } else if (curUnit instanceof DefinitionStmt && ResourceUtil.isRequest(curUnit)) {

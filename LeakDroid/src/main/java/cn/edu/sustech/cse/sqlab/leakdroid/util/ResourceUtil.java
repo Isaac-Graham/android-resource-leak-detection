@@ -1,8 +1,11 @@
 package cn.edu.sustech.cse.sqlab.leakdroid.util;
 
+import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.ICFGContext;
+import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.ResourceLeakDetector;
 import org.apache.log4j.Logger;
 import soot.*;
 import soot.jimple.*;
+import soot.toolkits.graph.UnitGraph;
 
 import java.util.*;
 
@@ -98,6 +101,10 @@ public class ResourceUtil {
     }
 
     public static void addRequestMethod(Type resource, SootMethod sootMethod) {
+//        UnitGraph cfg = ICFGContext.getCFGFromMethod(sootMethod);
+//        cfg.getTails()
+//        sootMethod.getActiveBody().getUnits();
+        if (SootMethodUtil.isReturnedField(sootMethod)) return;
         if (!resourceRequestMethods.containsKey(resource.toQuotedString())) {
             resourceRequestMethods.put(resource.toQuotedString(), new HashSet<>());
         }

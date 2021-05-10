@@ -69,6 +69,7 @@ public class ExtractorUtil {
             cfg.getSuccsOf(topUnit).forEach(successor -> {
                 if (ResourceUtil.isRequest(topUnit) && UnitUtil.isCaughtExceptionRef(successor)) return;
                 if (!(topUnit instanceof InvokeStmt) && UnitUtil.isCaughtExceptionRef(successor)) return;
+                if (topUnit instanceof InvokeStmt && topUnit.toString().contains("close") && UnitUtil.isCaughtExceptionRef(successor)) return;
                 successors.add(successor);
             });
         }

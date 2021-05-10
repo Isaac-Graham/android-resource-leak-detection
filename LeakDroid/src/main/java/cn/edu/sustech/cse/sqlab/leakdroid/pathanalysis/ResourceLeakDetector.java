@@ -6,6 +6,7 @@ import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.analyzer.PathAnalyzer;
 import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.pathextractor.CFGPath;
 import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.pathextractor.PathExtractor;
 import cn.edu.sustech.cse.sqlab.leakdroid.util.ResourceUtil;
+import cn.edu.sustech.cse.sqlab.leakdroid.util.SootMethodUtil;
 import cn.edu.sustech.cse.sqlab.leakdroid.util.UnitUtil;
 import org.apache.log4j.Logger;
 import soot.Body;
@@ -36,7 +37,7 @@ public class ResourceLeakDetector {
 
     public static LeakIdentifier detect(Body body, Set<SootMethod> meetMethods) {
         return detect(body.getUnits()
-                        .stream()
+                        .parallelStream()
                         .filter(ResourceUtil::isRequest)
                         .collect(Collectors.toList()),
                 body,
@@ -48,13 +49,15 @@ public class ResourceLeakDetector {
                                          Body body,
                                          Set<SootMethod> meetMethods,
                                          boolean interProcedural) {
-        Set<Value> fieldValues = getFieldValue(body);
+        Set<Value> fieldValues = SootMethodUtil.getFieldValue(body.getMethod());
         PathExtractor extractor = new PathExtractor();
         PathAnalyzer analyzer = new PathAnalyzer(body.getMethod(), meetMethods, fieldValues);
 
-        DaemonThread daemonThread = new DaemonThread(extractor, analyzer);
-        daemonThread.setDaemon(true);
-        daemonThread.start();
+        if (!OptionsArgs.debugMode) {
+            DaemonThread daemonThread = new DaemonThread(extractor, analyzer);
+            daemonThread.setDaemon(true);
+            daemonThread.start();
+        }
 
 
         List<CFGPath> paths = new ArrayList<>();
@@ -64,18 +67,6 @@ public class ResourceLeakDetector {
         Collections.sort(paths);
 
         return analyzer.analyze(paths, interProcedural);
-    }
-
-    private static Set<Value> getFieldValue(Body body) {
-        Set<Value> fieldValues = new HashSet<>();
-        body.getUnits().forEach(unit -> {
-            if (!(unit instanceof DefinitionStmt)) return;
-            Value rightOp = UnitUtil.getDefineOp(unit, UnitUtil.rightOp);
-            if (rightOp instanceof ThisRef || fieldValues.contains(rightOp)) {
-                fieldValues.add(UnitUtil.getDefineOp(unit, UnitUtil.leftOp));
-            }
-        });
-        return fieldValues;
     }
 
     private static class DaemonThread extends Thread {

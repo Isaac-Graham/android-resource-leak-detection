@@ -1,14 +1,19 @@
 package cn.edu.sustech.cse.sqlab.leakdroid.util;
 
+import cn.edu.sustech.cse.sqlab.leakdroid.pathanalysis.ICFGContext;
 import org.apache.log4j.Logger;
-import soot.RefType;
-import soot.SootClass;
-import soot.SootMethod;
-import soot.Type;
+import polyglot.ast.Return;
+import soot.*;
+import soot.jimple.DefinitionStmt;
+import soot.jimple.ReturnStmt;
+import soot.jimple.ThisRef;
 import soot.shimple.Shimple;
 import soot.shimple.ShimpleBody;
+import soot.toolkits.graph.UnitGraph;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
@@ -69,5 +74,40 @@ public class SootMethodUtil {
         sootMethod.retrieveActiveBody().getLocals().forEach(local -> {
             local.setName(String.format("%s.%s", SootMethodUtil.getFullName(sootMethod), local.getName()));
         });
+    }
+
+    public static Set<Value> getFieldValue(SootMethod sootMethod) {
+        /**
+         * TODO: This method cannot collect all of the field values in theory
+         * The result depends on the scanning order of units
+         */
+        Set<Value> fieldValues = new HashSet<>();
+        if (!sootMethod.hasActiveBody()) {
+            return fieldValues;
+        }
+        Body body = sootMethod.getActiveBody();
+        body.getUnits()
+                .stream()
+                .filter(unit -> unit instanceof DefinitionStmt)
+                .forEach(unit -> {
+                    Value rightOp = UnitUtil.getDefineOp(unit, UnitUtil.rightOp);
+                    if (rightOp instanceof ThisRef || fieldValues.contains(rightOp)) {
+                        fieldValues.add(UnitUtil.getDefineOp(unit, UnitUtil.leftOp));
+                    }
+                });
+        return fieldValues;
+    }
+
+    public static boolean isReturnedField(SootMethod sootMethod) {
+        if (!sootMethod.hasActiveBody()) return false;
+        List<ReturnStmt> returnStmts = sootMethod.getActiveBody()
+                .getUnits()
+                .parallelStream()
+                .filter(tail -> tail instanceof ReturnStmt)
+                .map(tail -> (ReturnStmt) tail)
+                .collect(Collectors.toList());
+        if (returnStmts.isEmpty()) return false;
+        Set<Value> fieldValues = getFieldValue(sootMethod);
+        return returnStmts.parallelStream().anyMatch(tail -> fieldValues.contains(tail.getOp()));
     }
 }
